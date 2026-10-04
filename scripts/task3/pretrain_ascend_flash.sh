@@ -1,6 +1,6 @@
 #!/bin/bash
-#SBATCH --job-name=Sep29_LLaVA_7B_Fixed2D_4x_pretrain
-#SBATCH --output=Sep29_LLaVA_7B_Fixed2D_4x_pretrain.txt
+#SBATCH --job-name=Sep29_LLaVA_7B_Fixed2D_10x_pretrain
+#SBATCH --output=Sep29_LLaVA_7B_Fixed2D_10x_pretrain.txt
 #SBATCH --time=15:00:00
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -34,7 +34,7 @@ deepspeed --num_gpus=1 src/task3_llava.py \
     --mm_vision_select_layer -1 \
     --mm_use_im_start_end False \
     --mm_use_im_patch_token False \
-    --output_dir /fs/scratch/PAS2836/yusenpeng_checkpoint/LLaVA_7B_Fixed2D_4x_pretrain \
+    --output_dir /fs/scratch/PAS2836/yusenpeng_checkpoint/LLaVA_7B_Fixed2D_10x_pretrain \
     --num_train_epochs 1 \
     --per_device_train_batch_size 8 \
     --per_device_eval_batch_size 4 \

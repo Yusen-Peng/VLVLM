@@ -145,11 +145,11 @@ def load_pretrained_model(model_path, model_base, model_name, load_8bit=False, l
             else:
                 print("🎲🎲🎲 We are using LLaMA models.")
                 tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=False)
-                # model = LlavaLlamaForCausalLM.from_pretrained(
-                #     model_path,
-                #     low_cpu_mem_usage=True,
-                #     **kwargs
-                # )
+                model = LlavaLlamaForCausalLM.from_pretrained(
+                    model_path,
+                    low_cpu_mem_usage=True,
+                    **kwargs
+                )
 
                 """
                     Paper's discussion: Combining with LLM-Stage Compression
@@ -160,22 +160,16 @@ def load_pretrained_model(model_path, model_base, model_name, load_8bit=False, l
                 #     low_cpu_mem_usage=True,
                 #     **kwargs
                 # )
-
-                """SparseVLM baseline."""
-                model = LlavaLlamaDynamicForCausalLM.from_pretrained(
-                    model_path,
-                    low_cpu_mem_usage=True,
-                    **kwargs
-                )
-                model.config._attn_implementation == "sdpa"
-                # for i in range(32):
-                #     flash_attn = LlamaDynamicvitFlashAttention2(config=model.config, layer_idx=i).half().to(device)
-                #     model.model.layers[i].add_module("flash_attn",flash_attn)
-                #     state_dict = model.model.layers[i].flash_attn.state_dict()
-                #     for key in model.model.layers[i].self_attn.state_dict().keys():
-                #         if key in state_dict.keys():
-                #             state_dict[key] = model.model.layers[i].self_attn.state_dict()[key]
-                #     model.model.layers[i].flash_attn.load_state_dict(state_dict)
+ 
+                """
+                    SparseVLM baseline (ICML'25; prune at the 2nd LLM layer)
+                """
+                # model = LlavaLlamaDynamicForCausalLM.from_pretrained(
+                #     model_path,
+                #     low_cpu_mem_usage=True,
+                #     **kwargs
+                # )
+                # model.config._attn_implementation == "sdpa"
 
     else:
         # Load language model

@@ -31,8 +31,8 @@ torchrun --standalone --nproc_per_node=4 --master_port=$MASTER_PORT src/task3_ll
     --deepspeed src/LLaVA_wrapper/scripts/finetune_zero3.json \
     --model_name_or_path lmsys/vicuna-7b-v1.5 \
     --version v1 \
-    --data_path /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_finetuning/cleaned.json \
-    --image_folder /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_finetuning \
+    --data_path /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_665K/cleaned.json \
+    --image_folder /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_665K \
     --vision_tower openai/clip-vit-large-patch14-336 \
     --mm_projector_type mlp2x_gelu \
     --tf32 True \

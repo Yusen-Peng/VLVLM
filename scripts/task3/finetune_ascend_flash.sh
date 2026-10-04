@@ -1,7 +1,7 @@
 #!/bin/bash
-#SBATCH --job-name=June1_LLaVA_7B_Fixed_4x_second_to_last_train_lora
-#SBATCH --output=June1_LLaVA_7B_Fixed_4x_second_to_last_train_lora.txt
-#SBATCH --time=80:00:00
+#SBATCH --job-name=Oct1_LLaVA_7B_Fixed2D_4x_train_lora
+#SBATCH --output=Oct1_LLaVA_7B_Fixed2D_4x_train_lora.txt
+#SBATCH --time=48:00:00
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --partition=nextgen
@@ -26,24 +26,24 @@ deepspeed src/task3_llava.py \
     --deepspeed src/LLaVA_wrapper/scripts/finetune.json \
     --model_name_or_path lmsys/vicuna-7b-v1.5 \
     --version v1 \
-    --data_path /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_finetuning/cleaned.json \
-    --image_folder /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_finetuning \
+    --data_path /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_665K/cleaned.json \
+    --image_folder /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_665K \
     --vision_tower openai/clip-vit-large-patch14-336 \
     --mm_projector_type mlp2x_gelu \
     --tf32 True \
     --bf16 True \
-    --pretrain_mm_mlp_adapter /fs/scratch/PAS2836/yusenpeng_checkpoint/LLaVA_7B_Fixed_4x_pretrain_second_to_last/mm_projector.bin \
+    --pretrain_mm_mlp_adapter /fs/scratch/PAS2836/yusenpeng_checkpoint/LLaVA_7B_Fixed2D_4x_pretrain/mm_projector.bin \
     --mm_vision_select_layer -2 \
     --mm_use_im_start_end False \
     --mm_use_im_patch_token False \
-    --output_dir /fs/scratch/PAS2836/yusenpeng_checkpoint/LLaVA_7B_Fixed_4x_second_to_last_train_lora \
+    --output_dir /fs/scratch/PAS2836/yusenpeng_checkpoint/LLaVA_7B_Fixed2D_4x_train_lora \
     --num_train_epochs 1 \
     --per_device_train_batch_size 4 \
     --per_device_eval_batch_size 4 \
     --gradient_accumulation_steps 32 \
     --evaluation_strategy "no" \
     --save_strategy "steps" \
-    --save_steps 15 \
+    --save_steps 300 \
     --save_total_limit 2 \
     --learning_rate 2e-5 \
     --weight_decay 0. \
