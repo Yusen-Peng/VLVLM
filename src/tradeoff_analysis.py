@@ -6,7 +6,9 @@ import numpy as np
 
 
 def get_category(model_name):
-    if model_name.startswith("fixed pooling"):
+    if model_name.startswith("fixed pooling(2D)"):
+        return "Fixed pooling (2D)"
+    elif model_name.startswith("fixed pooling"):
         return "Fixed pooling"
     elif model_name.startswith("PruMerge"):
         return "PruMerge"
@@ -87,6 +89,7 @@ def plot_tradeoff(ax, df, score_col, ylabel, title):
     colors = {
         "LLaVA": "#777777",
         "Fixed pooling": "#E69F00",
+        "Fixed pooling (2D)": "#CC79A7",
         "PruMerge": "#7A9E65",
         "PruneSID": "#6C8EBF",
         "VLVLM": "#D94A4A",
@@ -98,6 +101,7 @@ def plot_tradeoff(ax, df, score_col, ylabel, title):
     markers = {
         "LLaVA": "o",
         "Fixed pooling": "s",
+        "Fixed pooling (2D)": "h",
         "PruMerge": "^",
         "PruneSID": "P",
         "VLVLM": "D",
@@ -136,7 +140,7 @@ def plot_tradeoff(ax, df, score_col, ylabel, title):
         plot_order = ["Fixed pooling", "Perceiver", "VLVLM"]
     else:
         # Plot category lines
-        plot_order = ["PruMerge", "PruneSID", "SparseVLM", "Fixed pooling", "Perceiver", "VLVLM"]
+        plot_order = ["PruMerge", "PruneSID", "SparseVLM", "Fixed pooling", "Fixed pooling (2D)", "Perceiver", "VLVLM"]
 
     # for category in plot_order:
     #     group = df[df["Category"] == category].sort_values("Speedup")
@@ -163,6 +167,18 @@ def plot_tradeoff(ax, df, score_col, ylabel, title):
     #         alpha=0.85,   # <-- add this
     #         zorder=3,
     #     )
+
+    linestyles = {
+        "LLaVA": "-",
+        "Fixed pooling": "-",
+        "Fixed pooling (2D)": "--",
+        "PruMerge": "-",
+        "PruneSID": "-",
+        "VLVLM": "-",
+        "Perceiver": "-",
+        "SparseVLM": "-",
+    }
+
     for category in plot_order:
         group = df[df["Category"] == category].sort_values("Speedup")
         if len(group) == 0:
@@ -175,6 +191,7 @@ def plot_tradeoff(ax, df, score_col, ylabel, title):
             group["Speedup"],
             group[score_col],
             color=colors[category],
+            linestyle=linestyles[category],
             linewidth=2.6 if is_drip else 1.5,
             alpha=1.0 if is_drip else 0.65,
             zorder=4 if is_drip else 2,
@@ -339,6 +356,7 @@ def plot_tradeoff(ax, df, score_col, ylabel, title):
             [0], [0],
             color=colors[c],
             marker=markers[c],
+            linestyle=linestyles[c],
             linewidth=2.2,
             markersize=7,
             markeredgecolor="white",
