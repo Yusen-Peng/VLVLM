@@ -340,7 +340,7 @@ def visualize_maps(display_image, results, alpha, output_dir):
 
     output_path = os.path.join(
         output_dir,
-        "drip_plus_plus_analysis.png",
+        f"drip_plus_plus_analysis_{args.alpha}.png",
     )
 
     plt.savefig(
