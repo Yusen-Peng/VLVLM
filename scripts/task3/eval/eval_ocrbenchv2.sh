@@ -1,7 +1,7 @@
 #!/bin/bash
-#SBATCH --job-name=0929_OCRBenchV2_LLaVA_7B_CDPruner_10x_Siglip2
-#SBATCH --output=0929_OCRBenchV2_LLaVA_7B_CDPruner_10x_Siglip2.log
-#SBATCH --time=5:00:00
+#SBATCH --job-name=0929_OCRBenchV2_LLaVA_7B_DRIPpp_4x_alpha025
+#SBATCH --output=0929_OCRBenchV2_LLaVA_7B_DRIPpp_4x_alpha025.log
+#SBATCH --time=3:00:00
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --partition=nextgen
@@ -20,22 +20,11 @@ export TOKENIZERS_PARALLELISM=false
 
 cd /users/PAS2912/yusenpeng/DRIP/
 
-VERSION="LLaVA_7B_CDPruner_10x_Siglip2"
+VERSION="LLaVA_7B_DRIPpp_4x_alpha025"
 
-
-# python src/model_vqa_ocrbenchv2.py \
-#     --model_path /fs/scratch/PAS2836/yusenpeng_checkpoint/LLaVA_7B_FLASH_finetune_ALL_ONCE_full \
-#     --dataset_path lmms-lab/OCRBench-v2 \
-#     --dataset_split test \
-#     --cache_dir /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/ocrbenchv2 \
-#     --output_folder /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/ocrbenchv2/results \
-#     --save_name ${VERSION} \
-#     --num_workers 1 \
-#     --temperature 0 \
-#     --conv_mode vicuna_v1
 
 python src/model_vqa_ocrbenchv2.py \
-    --model_path /fs/scratch/PAS2836/yusenpeng_checkpoint/LLaVA_7B_SigLIP_HF_v2_DRIP_4x_temp001_new_downsample_train_full \
+    --model_path /fs/scratch/PAS2836/yusenpeng_checkpoint/LLaVA_7B_DRIP_4x_pretrain_NEW_DOWN_temp001_train_full \
     --dataset_path lmms-lab/OCRBench-v2 \
     --dataset_split test \
     --cache_dir /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/ocrbenchv2 \
@@ -44,6 +33,17 @@ python src/model_vqa_ocrbenchv2.py \
     --num_workers 1 \
     --temperature 0 \
     --conv_mode vicuna_v1
+
+# python src/model_vqa_ocrbenchv2.py \
+#     --model_path /fs/scratch/PAS2836/yusenpeng_checkpoint/LLaVA_7B_SigLIP_HF_v2_DRIP_4x_temp001_new_downsample_train_full \
+#     --dataset_path lmms-lab/OCRBench-v2 \
+#     --dataset_split test \
+#     --cache_dir /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/ocrbenchv2 \
+#     --output_folder /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/ocrbenchv2/results \
+#     --save_name ${VERSION} \
+#     --num_workers 1 \
+#     --temperature 0 \
+#     --conv_mode vicuna_v1
 
 # python src/model_vqa_ocrbenchv2_qwen.py \
 #     --model_path /fs/scratch/PAS2836/yusenpeng_checkpoint/LLaVA_Qwen2.5-14B-Instruct_DRIP_4x_pretrain_NEW_DOWN_temp001_train_full \
