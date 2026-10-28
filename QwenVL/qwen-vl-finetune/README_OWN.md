@@ -21,6 +21,8 @@ sbatch SFT_job_compressed.sh
 # uncompressed baseline with distillation
 sbatch SFT_job_distill.sh
 
+# fixed pooling or DRIP, configure in train/train_distillation.py
+sbatch SFT_job_distill_compressed.sh
 ```
 
 ## Eval

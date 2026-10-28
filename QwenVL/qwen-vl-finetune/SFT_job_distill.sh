@@ -2,13 +2,13 @@
 #SBATCH --job-name=Qwen3VL_SFT_Distill
 #SBATCH --output=logs/Qwen3VL_SFT_Distill.out
 #SBATCH --account=PAS2836
-#SBATCH --partition=debug-nextgen
+#SBATCH --partition=nextgen
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --gpus-per-node=1
 #SBATCH --cpus-per-task=16
 #SBATCH --mem=128G
-#SBATCH --time=01:00:00
+#SBATCH --time=24:00:00
 
 module load miniconda3/24.1.2-py310
 conda deactivate
