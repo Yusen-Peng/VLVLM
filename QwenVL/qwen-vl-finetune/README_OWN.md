@@ -14,11 +14,13 @@ conda activate DRIP_qwenvl_flash
 cd /users/PAS2912/yusenpeng/DRIP/QwenVL/qwen-vl-finetune
 # uncompressed baseline
 sbatch SFT_job.sh
-
-sbatch SFT_job_bp_warmup.sh
-
 # fixed pooling or DRIP, configure in train/train_compressed_qwen.py
 sbatch SFT_job_compressed.sh
+
+
+# uncompressed baseline with distillation
+sbatch SFT_job_distill.sh
+
 ```
 
 ## Eval
