@@ -1,6 +1,6 @@
 #!/bin/bash
-#SBATCH --job-name=Qwen3VL_SFT_DRIP_4x_Distill
-#SBATCH --output=logs/Qwen3VL_SFT_DRIP_4x_Distill.out
+#SBATCH --job-name=Qwen3VL_SFT_DRIP_4x_Distill_rerun
+#SBATCH --output=logs/Qwen3VL_SFT_DRIP_4x_Distill_rerun.out
 #SBATCH --account=PAS2836
 #SBATCH --partition=nextgen
 #SBATCH --nodes=1
@@ -49,8 +49,8 @@ entry_file=qwenvl/train/train_distillation.py
 datasets=llava_665k%100
 
 # Output configuration
-run_name="Qwen3VL_SFT_DRIP_4x_Distill"
-output_dir=/fs/scratch/PAS2836/yusenpeng_checkpoint/Qwen3VL_SFT_DRIP_4x_Distill
+run_name="Qwen3VL_SFT_DRIP_4x_Distill_rerun"
+output_dir=/fs/scratch/PAS2836/yusenpeng_checkpoint/Qwen3VL_SFT_DRIP_4x_Distill_rerun
 
 # Training arguments
 args="
