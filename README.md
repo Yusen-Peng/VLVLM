@@ -1,4 +1,4 @@
-# Dynamic Image Tokenization for Efficient VLMs
+# VLVLM: Learning Variable Length Visual Tokens for Efficient Vision Language Models
 
 ## News/Updates
 
