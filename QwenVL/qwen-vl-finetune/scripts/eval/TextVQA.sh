@@ -1,6 +1,6 @@
 #!/bin/bash
-#SBATCH --job-name=1028_textVQA_Qwen3VL_SFT_Distill_DRIP_4x_rerun
-#SBATCH --output=1028_textVQA_Qwen3VL_SFT_Distill_DRIP_4x_rerun.log
+#SBATCH --job-name=1028_TEXTVQA_Qwen3VL_SFT_DRIP_4x_Distill_rerun
+#SBATCH --output=1028_TEXTVQA_Qwen3VL_SFT_DRIP_4x_Distill_rerun.log
 #SBATCH --time=01:00:00
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -17,7 +17,7 @@ export OMP_NUM_THREADS=16
 export MASTER_PORT=$((12000 + RANDOM % 20000))
 export CUDA_LAUNCH_BLOCKING=1
 
-VERSION="Qwen3VL_SFT_Distill_DRIP_4x_rerun"
+VERSION="1028_TEXTVQA_Qwen3VL_SFT_DRIP_4x_Distill_rerun"
 
 cd /users/PAS2912/yusenpeng/DRIP/QwenVL/qwen-vl-finetune/qwenvl
 
