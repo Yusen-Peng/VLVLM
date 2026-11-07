@@ -448,6 +448,9 @@ class BatchedQwen3VLModel(CompressedQwen3VLModel):
                 keep_mask=keep_mask,
             )
 
+            # Save the actual attention mask corresponding to the compressed KV cache. Reset it on every new image prefill.
+            self._compressed_attention_mask = attention_mask.detach().clone()
+
             packed_seq_len = inputs_embeds.shape[1]
 
             # 7. Insert compressed visual embeddings (MOSTLY UNCHANGED)
@@ -526,17 +529,47 @@ class BatchedQwen3VLModel(CompressedQwen3VLModel):
                 dtype=torch.long,
             )
 
-            if attention_mask is not None:
-                expected_mask_len = physical_past_len + seq_length
-                if attention_mask.shape != (B, expected_mask_len):
-                    raise RuntimeError(
-                        "Attention mask is not aligned with the "
-                        "compressed KV cache. Expected shape "
-                        f"{(B, expected_mask_len)}, got "
-                        f"{tuple(attention_mask.shape)}. "
-                        "The generation wrapper must maintain "
-                        "the compressed attention mask."
+            # if attention_mask is not None:
+            #     expected_mask_len = physical_past_len + seq_length
+            #     if attention_mask.shape != (B, expected_mask_len):
+            #         raise RuntimeError(
+            #             "Attention mask is not aligned with the "
+            #             "compressed KV cache. Expected shape "
+            #             f"{(B, expected_mask_len)}, got "
+            #             f"{tuple(attention_mask.shape)}. "
+            #             "The generation wrapper must maintain "
+            #             "the compressed attention mask."
+            #         )
+
+
+            if physical_past_len > 0:
+                cached_mask = getattr(self, "_compressed_attention_mask", None)
+
+                if cached_mask is None:
+                    raise RuntimeError("Missing compressed attention mask. A compressed image prefill must run first.")
+
+                if cached_mask.shape != (B, physical_past_len):
+                    raise RuntimeError("Compressed attention mask/cache mismatch: "
+                        f"mask={tuple(cached_mask.shape)}, "
+                        f"cache_length={physical_past_len}"
                     )
+
+                if attention_mask is None:
+                    new_token_mask = torch.ones(B, seq_length, device=cached_mask.device, dtype=cached_mask.dtype)
+                else:
+                    if attention_mask.shape[0] != B:
+                        raise RuntimeError("Generation batch size mismatch.")
+
+                    new_token_mask = attention_mask[:, -seq_length:].to(device=cached_mask.device, dtype=cached_mask.dtype)
+
+                # Preserve compressed prefill padding and append new tokens.
+                attention_mask = torch.cat([cached_mask, new_token_mask], dim=1)
+                self._compressed_attention_mask = attention_mask.detach().clone()
+                expected_mask_len = physical_past_len + seq_length
+                assert attention_mask.shape == (B, expected_mask_len), (
+                    f"Expected {(B, expected_mask_len)}, "
+                    f"got {tuple(attention_mask.shape)}"
+                )
 
             if position_ids is None:
                 if self.rope_deltas is None:
