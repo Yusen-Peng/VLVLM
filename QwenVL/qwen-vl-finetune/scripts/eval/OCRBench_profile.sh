@@ -1,6 +1,6 @@
 #!/bin/bash
-#SBATCH --job-name=1028_OCRBench_Qwen3VL_SFT_VLVLM_profile
-#SBATCH --output=1028_OCRBench_Qwen3VL_SFT_VLVLM_profile.log
+#SBATCH --job-name=1028_OCRBench_Qwen3VL_SFT_Fixed_profile
+#SBATCH --output=1028_OCRBench_Qwen3VL_SFT_Fixed_profile.log
 #SBATCH --time=00:20:00
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -18,7 +18,7 @@ export MASTER_PORT=$((12000 + RANDOM % 20000))
 
 cd /users/PAS2912/yusenpeng/DRIP/QwenVL/qwen-vl-finetune/qwenvl
 
-VERSION="1028_OCRBench_Qwen3VL_SFT_VLVLM_profile"
+VERSION="1028_OCRBench_Qwen3VL_SFT_Fixed_profile"
 
 # python eval_code/model_vqa_ocrbench_profile.py \
 #     --model_path /fs/scratch/PAS2836/yusenpeng_checkpoint/Qwen3VL_SFT_10 \
@@ -47,7 +47,7 @@ VERSION="1028_OCRBench_Qwen3VL_SFT_VLVLM_profile"
 #     --measure-latency
 
 python eval_code/model_vqa_ocrbench_profile.py \
-    --model_path /fs/scratch/PAS2836/yusenpeng_checkpoint/Qwen3VL_SFT_DRIP_4x_Distill_rerun \
+    --model_path /fs/scratch/PAS2836/yusenpeng_checkpoint/Qwen3VL_SFT_10 \
     --model_base Qwen/Qwen3-VL-4B-Instruct \
     --image_folder /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/ocrbench/OCRBench_Images \
     --output_folder /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/ocrbench/results \
@@ -55,12 +55,27 @@ python eval_code/model_vqa_ocrbench_profile.py \
     --OCRBench_file /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/ocrbench/OCRBench.json \
     --temperature 0 \
     --num_workers 1 \
-    --merge-strategy DRIP \
+    --merge-strategy Fixed \
     --compression-rate 0.25 \
-    --drip-path /fs/scratch/PAS2836/yusenpeng_checkpoint/Qwen3VL_SFT_DRIP_4x_Distill_rerun/drip.bin \
-    --mlp-ratio 4.0 \
     --save_name ${VERSION}_latency \
     --measure-latency
+
+
+# python eval_code/model_vqa_ocrbench_profile.py \
+#     --model_path /fs/scratch/PAS2836/yusenpeng_checkpoint/Qwen3VL_SFT_DRIP_4x_Distill_rerun \
+#     --model_base Qwen/Qwen3-VL-4B-Instruct \
+#     --image_folder /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/ocrbench/OCRBench_Images \
+#     --output_folder /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/ocrbench/results \
+#     --save_name ${VERSION} \
+#     --OCRBench_file /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/ocrbench/OCRBench.json \
+#     --temperature 0 \
+#     --num_workers 1 \
+#     --merge-strategy DRIP \
+#     --compression-rate 0.25 \
+#     --drip-path /fs/scratch/PAS2836/yusenpeng_checkpoint/Qwen3VL_SFT_DRIP_4x_Distill_rerun/drip.bin \
+#     --mlp-ratio 4.0 \
+#     --save_name ${VERSION}_latency \
+#     --measure-latency
 
 
 conda deactivate

@@ -1,6 +1,6 @@
 #!/bin/bash
-#SBATCH --job-name=1028_TextVQA_Qwen3VL_SFT_VLVLM_profile
-#SBATCH --output=1028_TextVQA_Qwen3VL_SFT_VLVLM_profile.log
+#SBATCH --job-name=1028_TextVQA_Qwen3VL_SFT_Fixed_profile
+#SBATCH --output=1028_TextVQA_Qwen3VL_SFT_Fixed_profile.log
 #SBATCH --time=01:00:00
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -18,7 +18,7 @@ export MASTER_PORT=$((12000 + RANDOM % 20000))
 
 cd /users/PAS2912/yusenpeng/DRIP/QwenVL/qwen-vl-finetune/qwenvl
 
-VERSION="1028_TextVQA_Qwen3VL_SFT_VLVLM_profile"
+VERSION="1028_TextVQA_Qwen3VL_SFT_Fixed_profile"
 
 QUESTION_FILE="/fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/textVQA/llava_textvqa_val_v051_ocr.jsonl"
 IMAGE_FOLDER="/fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/textVQA/train_images"
@@ -55,22 +55,34 @@ mkdir -p "${ANSWER_FOLDER}"
 #     --compression-rate 0.25 \
 #     --measure-latency
 
+python eval_code/model_vqa_loader_profile.py \
+    --model-path /fs/scratch/PAS2836/yusenpeng_checkpoint/Qwen3VL_SFT_10 \
+    --model-base Qwen/Qwen3-VL-4B-Instruct \
+    --question-file "${QUESTION_FILE}" \
+    --image-folder "${IMAGE_FOLDER}" \
+    --answers-file "${ANSWER_FOLDER}/${VERSION}_PruneSID_4x_latency.jsonl" \
+    --temperature 0 \
+    --merge-strategy Fixed \
+    --compression-rate 0.25 \
+    --measure-latency
+
+
 # ============================================================
 # VLVLM (DRIP) 4x
 # ============================================================
 
-python eval_code/model_vqa_loader_profile.py \
-    --model-path /fs/scratch/PAS2836/yusenpeng_checkpoint/Qwen3VL_SFT_DRIP_4x_Distill_rerun \
-    --model-base Qwen/Qwen3-VL-4B-Instruct \
-    --question-file "${QUESTION_FILE}" \
-    --image-folder "${IMAGE_FOLDER}" \
-    --answers-file "${ANSWER_FOLDER}/${VERSION}_VLVLM_4x_latency.jsonl" \
-    --temperature 0 \
-    --merge-strategy DRIP \
-    --compression-rate 0.25 \
-    --drip-path /fs/scratch/PAS2836/yusenpeng_checkpoint/Qwen3VL_SFT_DRIP_4x_Distill_rerun/drip.bin \
-    --mlp-ratio 4.0 \
-    --measure-latency
+# python eval_code/model_vqa_loader_profile.py \
+#     --model-path /fs/scratch/PAS2836/yusenpeng_checkpoint/Qwen3VL_SFT_DRIP_4x_Distill_rerun \
+#     --model-base Qwen/Qwen3-VL-4B-Instruct \
+#     --question-file "${QUESTION_FILE}" \
+#     --image-folder "${IMAGE_FOLDER}" \
+#     --answers-file "${ANSWER_FOLDER}/${VERSION}_VLVLM_4x_latency.jsonl" \
+#     --temperature 0 \
+#     --merge-strategy DRIP \
+#     --compression-rate 0.25 \
+#     --drip-path /fs/scratch/PAS2836/yusenpeng_checkpoint/Qwen3VL_SFT_DRIP_4x_Distill_rerun/drip.bin \
+#     --mlp-ratio 4.0 \
+#     --measure-latency
 
 
 # ============================================================
