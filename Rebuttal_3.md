@@ -6,11 +6,12 @@ We thanks for reviewer ``u9A8`` feedback and comments. Here is how we address th
 
 > benchmark-level latency measures (Please specify hardware, batch size, input resolution, and output length, and clarify the incremental training cost relative to fixed pooling.)
 
-[TO-DO]
+[COPY-PASTE]
 
 
 > comparison with more training-based methods.
 
+[COPY-PASTE]
 
 > Robustness of the incremental gains.
 
@@ -30,23 +31,7 @@ For all experiments, we already apply McNemar's test to assess whether the obser
 | McNemar's test | 1.481 | 3.25 | 0.575 | 32.397 | 0.455 |
 | p-value | 0.223 | 0.071 | 0.448 | ***0.000*** | 0.499 |
 
-On benchmark DocVQA in particular, our method VLVLM's performance gain is consistently significant.
-
-Besides statistical testing, we also evaluate our method against baselines on a more recent, real-world, high-resolution benchmark: MME-RealWorld:
-
-| Model | monitoring | OCR | Diagram and Table | Autonomous Driving | Remote Sensing | Overall | Avg. Ret. |
-| ----- | ---------- | --- | ----------------- | ------------------ | -------------- | ------- | --------- |
-| LLaVA | 19.22 | 43.62 | 20.21 | 26.89 | 22.74 | 28.09 | 100% |
-| 4x compression |
-| PruMerge | 19.31 | 42.65 | 20.27 | 26.94 | 22.63 | 27.87 | 99.22% |
-| PruneSID | 19.03 | 43.14 | 20.61 | 26.64 | **28.09** | 28.12 | 100.11% |
-| fixed pooling | **21.95** | 44.16 | 20.43 | 26.20 | 24.48 | 28.69 | 102.14% |
-| VLVLM (ours) | 20.26 | **48.24** | **21.79** | **27.49** | 26.86 | **30.77** | **109.54%** |
-| 8x compression |
-| PruMerge | 19.31 | 42.46 | 20.27 | 26.97 | 22.66 | 27.82 | 99.04% |
-| PruneSID | 19.31 | 42.89 | 20.49 | 26.64 | 22.74 | 28.03 | 99.79% |
-| fixed pooling | 20.95 | **47.06** | 20.89 | 27.35 | 26.57 | 30.20 | 107.51% | 
-| VLVLM (ours) | **21.86** | 46.95 | **21.44** | **27.43** | **26.97** | **30.44** | 108.37% |
+On benchmark DocVQA in particular, our method VLVLM's performance gain is consistently statistically significant.
 
 
 

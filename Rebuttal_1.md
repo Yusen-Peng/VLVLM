@@ -31,27 +31,29 @@ We also conduct experiments on training-based spatially local 2D pooling and her
 
 The results demonstrate that 2D fixed pooling performs similarly as 1D fixed pooling, and our VLVLM maintains the best OCR-heavy task performance.
 
-> comparison with more training-based methods such as finetuned PruMerge and PruneSID or LearnPruner.
+> comparison with more training-based methods.
 
-[TO-THINK]
-
-> benchmark-level latency measures.
+[COPY-PASTE]
 
 
-Because Qwen3VL processes images at their native resolution without resizing, the efficiency improvements are more pronounced: for an image with more than 3700 patches, TFLOPs drop from 40.3 to 17.4 with $4\times$ compression.
+> benchmark-level latency measures on Qwen3VL
+
+We report LLM prefill latency in miliseconds for Qwen3VL on multiple benchmarks as follows. Our method significantly reduces LLM prefill latency and achieves similar speedup as other state-of-the-art methods like PruneSID.
+
+| method | OCRBench | TextVQA | ChartQAPro |
+| ------ | -------- | ------- | ---------- |
+| Qwen3VL | 92.02 | 69.50 | 131.79 |
+| 4x compression | 
+| PruneSID | 57.77 | 53.54 | 63.62 |
+| **VLVLM (ours)** | 58.45 | 54.00 | 63.02 |
 
 
-
-
-
-
-
-Qwen3VL benchmark runtime (I/O bound):
+<!-- Qwen3VL benchmark runtime (I/O bound):
 
 | method | OCRBench | ChartQAPro |
 | ------ | -------- | ---------- |
 | original | 483 sec / 1000 samples | 893 sec / 1948 samples |
 | 4x compression |
 | PruneSID | 460 sec / 1000 samples | 872 sec / 1948 samples | 
-| VLVLM | 470 sec / 1000 samples | 844 sec / 1948 samples |
+| VLVLM | 470 sec / 1000 samples | 844 sec / 1948 samples | -->
 
