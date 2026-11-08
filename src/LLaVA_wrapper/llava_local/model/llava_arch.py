@@ -145,6 +145,15 @@ class LlavaMetaForCausalLM(ABC):
 
     def encode_images(self, images, inference: bool = False, texts=None):
         vision_tower: CLIPVisionTower = self.get_model().get_vision_tower()
+
+        if self.config.mm_projector_type == "tokenpacker":
+            # Returns (image_features, image_features_multi)
+            vt_out = vision_tower.forward(images, inference=inference, texts=texts)
+            # Pass BOTH feature tensors to TokenPacker
+            image_features = self.get_model().mm_projector(vt_out)
+            # TokenPacker has no DRIP boundary loss
+            return image_features, None
+
         vt_out = vision_tower.forward(images, inference=inference, texts=texts)
 
         boundary_loss = None

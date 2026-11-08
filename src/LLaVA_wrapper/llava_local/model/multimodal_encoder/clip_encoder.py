@@ -70,6 +70,8 @@ class CLIPVisionTower(nn.Module):
         self.select_layer = args.mm_vision_select_layer
         self.select_feature = getattr(args, 'mm_vision_select_feature', 'patch')
 
+        self.use_tokenpacker = getattr(args, "mm_projector_type", None) == "tokenpacker"
+
         self.relevance_alpha = relevance_alpha
         self.relevance_aggregation = relevance_aggregation
         assert 0.0 <= relevance_alpha <= 1.0
@@ -498,6 +500,19 @@ class CLIPVisionTower(nn.Module):
 
     def feature_select(self, image_forward_outs):
         image_features = image_forward_outs.hidden_states[self.select_layer]
+
+        if self.use_tokenpacker:
+            # from official github: https://github.com/CircleRadon/TokenPacker/blob/main/llava/model/multimodal_encoder/clip_encoder.py
+            layers = [12, 16, 22, 23] 
+            image_features_multi = torch.cat([image_forward_outs.hidden_states[l] for l in layers], dim=2)
+
+            if self.select_feature == "patch":
+                image_features = image_features[:, 1:]
+                image_features_multi = image_features_multi[:, 1:]
+            elif self.select_feature != "cls_patch":
+                raise ValueError(f"Unexpected select feature: {self.select_feature}")
+            return image_features, image_features_multi
+
         image_features = image_features[:, 1:]
         return image_features
     
@@ -594,6 +609,12 @@ class CLIPVisionTower(nn.Module):
 
 
     def forward(self, images, texts=None, inference=False):
+
+        if self.use_tokenpacker:
+            image_forward_outs = self.vision_tower(images.to(device=self.device, dtype=self.dtype), output_hidden_states=True)
+            image_features, image_features_multi = self.feature_select(image_forward_outs)
+            return image_features.to(images.dtype), image_features_multi.to(images.dtype)
+
         if isinstance(images, list):
             image_features = []
             boundary_losses = []

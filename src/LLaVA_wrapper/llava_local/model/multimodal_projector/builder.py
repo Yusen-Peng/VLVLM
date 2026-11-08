@@ -3,6 +3,9 @@ import torch.nn as nn
 import re
 
 
+from .TokenPacker import TokenPacker
+
+
 class IdentityMap(nn.Module):
     def __init__(self):
         super().__init__()
@@ -38,6 +41,15 @@ def build_vision_projector(config, delay_load=False, **kwargs):
 
     if projector_type == 'linear':
         return nn.Linear(config.mm_hidden_size, config.hidden_size)
+
+    if projector_type == 'tokenpacker':
+        print("💛💛💛 Building TokenPacker vision projector 💛💛💛", flush=True)
+        return TokenPacker(
+            raw_grid=24,
+            embed_dim=config.mm_hidden_size,
+            kv_dim=config.mm_hidden_size,
+            hidden_size=config.hidden_size
+        )
 
     mlp_gelu_match = re.match(r'^mlp(\d+)x_gelu$', projector_type)
     if mlp_gelu_match:
