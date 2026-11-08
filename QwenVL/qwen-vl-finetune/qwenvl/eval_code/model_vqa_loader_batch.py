@@ -4,6 +4,7 @@ import json
 import math
 import os
 import sys
+import statistics
 
 import shortuuid
 import torch
@@ -281,6 +282,16 @@ def eval_model(args):
     if answer_dir:
         os.makedirs(answer_dir, exist_ok=True)
 
+
+    latency_file = answers_file + ".latency.jsonl"
+
+    lat_file = (
+        open(latency_file, "w")
+        if args.measure_latency
+        else None
+    )
+
+
     data_loader = create_data_loader(
         questions=questions,
         image_folder=os.path.expanduser(args.image_folder),
@@ -333,11 +344,97 @@ def eval_model(args):
             # generate() returns that full padded prefix followed by generated tokens.
             prompt_length = inputs["input_ids"].shape[1]
 
-            with torch.inference_mode():
-                generated_ids = model.generate(
-                    **inputs,
-                    **generation_kwargs,
+            if args.measure_latency:
+
+                # ========================================================
+                # Warmup: first batch only, outside timed measurements
+                # ========================================================
+
+                if not warmup_done:
+                    print(f"🔥 Warming up with batch size {actual_batch_size}")
+
+                    with torch.inference_mode():
+                        for _ in range(args.latency_warmup):
+                            model.generate(
+                                **inputs,
+                                **generation_kwargs,
+                            )
+
+                    torch.cuda.synchronize()
+                    warmup_done = True
+
+                # ========================================================
+                # Measure CUDA latency and peak allocated memory
+                # ========================================================
+
+                torch.cuda.synchronize()
+                torch.cuda.reset_peak_memory_stats()
+
+                profiler.start()
+
+                try:
+                    with torch.inference_mode():
+                        generated_ids = model.generate(
+                            **inputs,
+                            **generation_kwargs,
+                        )
+
+                    latency = profiler.stop()
+                    torch.cuda.synchronize()
+
+                except Exception:
+                    profiler.enabled = False
+                    raise
+
+                # ========================================================
+                # Batch-level metadata
+                # ========================================================
+
+                generated_tokens_per_sample = int(
+                    generated_ids.shape[1] - prompt_length
                 )
+
+                latency["question_ids"] = [
+                    line["question_id"]
+                    for line in lines
+                ]
+
+                latency["batch_size"] = actual_batch_size
+
+                latency["generated_tokens"] = (
+                    generated_tokens_per_sample
+                )
+
+                # Counts generated token slots, including padding
+                # for sequences that terminate earlier than others.
+                latency["generated_token_slots"] = (
+                    generated_tokens_per_sample * actual_batch_size
+                )
+
+                latency["prompt_length_padded"] = prompt_length
+
+                latency["prefill_throughput_img_s"] = (
+                    actual_batch_size * 1000.0 / latency["prefill_ms"]
+                    if latency.get("prefill_ms", 0) > 0
+                    else None
+                )
+
+                latency["peak_memory_gib"] = (
+                    torch.cuda.max_memory_allocated() / (1024 ** 3)
+                )
+
+                latencies.append(latency)
+
+                lat_file.write(json.dumps(latency) + "\n")
+                lat_file.flush()
+
+            else:
+
+                with torch.inference_mode():
+                    generated_ids = model.generate(
+                        **inputs,
+                        **generation_kwargs,
+                    )
 
             # Trim the padded original prompt length.
             generated_ids_trimmed = generated_ids[:, prompt_length:]
@@ -363,6 +460,133 @@ def eval_model(args):
                     }) + "\n"
                 )
             ans_file.flush()
+
+    # ============================================================
+    # Finalize profiling
+    # ============================================================
+
+    if lat_file is not None:
+        lat_file.close()
+        profiler.remove()
+
+
+    if args.measure_latency and latencies:
+
+        def avg(key):
+            values = [
+                record[key]
+                for record in latencies
+                if record.get(key) is not None
+            ]
+
+            return (
+                float(statistics.mean(values))
+                if values
+                else None
+            )
+
+        total_samples = sum(
+            record["batch_size"]
+            for record in latencies
+        )
+
+        total_prefill_ms = sum(
+            record["prefill_ms"]
+            for record in latencies
+            if record.get("prefill_ms") is not None
+        )
+
+        total_decode_ms = sum(
+            record["decode_ms"]
+            for record in latencies
+        )
+
+        total_decode_steps = sum(
+            record["decode_steps"]
+            for record in latencies
+        )
+
+        total_forward_ms = sum(
+            record["total_forward_ms"]
+            for record in latencies
+        )
+
+        # ========================================================
+        # Throughput metrics
+        # ========================================================
+
+        prefill_throughput = (
+            total_samples * 1000.0 / total_prefill_ms
+            if total_prefill_ms > 0
+            else None
+        )
+
+        decode_tpot_ms = (
+            total_decode_ms / total_decode_steps
+            if total_decode_steps > 0
+            else None
+        )
+
+        total_forward_throughput = (
+            total_samples * 1000.0 / total_forward_ms
+            if total_forward_ms > 0
+            else None
+        )
+
+        # ========================================================
+        # Summary
+        # ========================================================
+
+        summary = {
+            "model": model_name,
+            "merge_strategy": args.merge_strategy,
+            "compression_rate": args.compression_rate,
+
+            "batch_size": args.batch_size,
+            "num_samples": total_samples,
+            "num_batches": len(latencies),
+
+            "num_chunks": args.num_chunks,
+            "chunk_idx": args.chunk_idx,
+
+            # Latency: milliseconds per batch
+            "prefill_ms": avg("prefill_ms"),
+            "llm_prefill_ms": avg("llm_prefill_ms"),
+            "decode_tpot_ms": decode_tpot_ms,
+            "decode_total_ms": avg("decode_ms"),
+            "total_forward_ms": avg("total_forward_ms"),
+
+            # Throughput: images/s
+            "prefill_throughput_img_s": prefill_throughput,
+            "total_forward_throughput_img_s": (
+                total_forward_throughput
+            ),
+
+            # Memory: maximum allocated GiB
+            "peak_memory_gib": max(
+                record["peak_memory_gib"]
+                for record in latencies
+            ),
+
+            # Generation statistics
+            "mean_generated_tokens": avg("generated_tokens"),
+            "mean_decode_steps": avg("decode_steps"),
+        }
+
+        summary_path = (
+            answers_file + ".latency_summary.json"
+        )
+
+        with open(summary_path, "w") as f:
+            json.dump(summary, f, indent=4)
+
+        print("\n" + "=" * 60)
+        print("⏱️ Qwen3-VL Batched Latency Summary")
+        print("=" * 60)
+
+        for key, value in summary.items():
+            print(f"{key}: {value}")
+        print("=" * 60)
 
 if __name__ == "__main__":
 
@@ -481,6 +705,15 @@ if __name__ == "__main__":
         "--num-workers",
         type=int,
         default=0,
+    )
+    
+    parser.add_argument(
+        "--measure-latency", action="store_true",
+        help="Record prefill and decoding CUDA-event timings",
+    )
+    parser.add_argument(
+        "--latency-warmup", type=int, default=3,
+        help="Number of untimed generate() calls on the first sample",
     )
 
     args = parser.parse_args()
