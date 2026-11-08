@@ -12,6 +12,7 @@ from LLaVA_wrapper.llava_local.conversation import conv_templates, SeparatorStyl
 from LLaVA_wrapper.llava_local.model.builder import load_pretrained_model
 from LLaVA_wrapper.llava_local.utils import disable_torch_init
 from LLaVA_wrapper.llava_local.mm_utils import tokenizer_image_token, process_images, get_model_name_from_path
+from LLaVA_wrapper.llava_local.llava_latency_profiler import LLaVALatencyProfiler
 from PIL import Image
 import math
 
@@ -83,11 +84,26 @@ def eval_model(args):
     model_name = get_model_name_from_path(model_path)
     tokenizer, model, image_processor, context_len = load_pretrained_model(model_path, args.model_base, model_name)
 
+
+    model.eval()
+    profiler = None
+    warmup_done = False
+    latencies = []
+    profiler = LLaVALatencyProfiler(model)
+    profiler.install()
+
+
+
     questions = [json.loads(q) for q in open(os.path.expanduser(args.question_file), "r")]
     questions = get_chunk(questions, args.num_chunks, args.chunk_idx)
     answers_file = os.path.expanduser(args.answers_file)
     os.makedirs(os.path.dirname(answers_file), exist_ok=True)
     ans_file = open(answers_file, "w")
+
+
+    latency_file = answers_file + ".latency.jsonl"
+    lat_file = open(latency_file, "w")
+
 
     if 'plain' in model_name and 'finetune' not in model_name.lower() and 'mmtag' not in args.conv_mode:
         args.conv_mode = args.conv_mode + '_mmtag'
@@ -102,45 +118,149 @@ def eval_model(args):
         input_ids = input_ids.to(device='cuda', non_blocking=True)
 
 
-        if model.get_vision_tower().merge_strategy == "CDPruner" or model.get_vision_tower().merge_strategy == "DRIP++":
-            question = cur_prompt
-            question = question.replace("\nAnswer the question using a single word or phrase.", "")
+        # Prepare generation arguments
+        generation_kwargs = {
+            "images": image_tensor.to(
+                dtype=torch.float16,
+                device="cuda",
+                non_blocking=True,
+            ),
+            "image_sizes": image_sizes,
+            "do_sample": args.temperature > 0,
+            "num_beams": args.num_beams,
+            "max_new_tokens": args.max_new_tokens,
+            "use_cache": True,
+        }
+
+        if args.temperature > 0:
+            generation_kwargs["temperature"] = args.temperature
+
+            if args.top_p is not None:
+                generation_kwargs["top_p"] = args.top_p
+
+        # Preserve CDPruner / DRIP++ special handling.
+        if model.get_vision_tower().merge_strategy in {"CDPruner", "DRIP++"}:
+            question = cur_prompt.replace("\nAnswer the question using a single word or phrase.", "")
+            generation_kwargs["texts"] = question
+
+
+        # Warm up with the first actual sample.
+        if not warmup_done:
+            print(f"🔥 LLaVA warmup: 3 runs")
+
+            with torch.inference_mode():
+                for _ in range(3):
+                    model.generate(
+                        input_ids,
+                        **generation_kwargs,
+                    )
+
+            torch.cuda.synchronize()
+            warmup_done = True
+
+        torch.cuda.synchronize()
+        torch.cuda.reset_peak_memory_stats()
+
+        profiler.start()
+
+        try:
             with torch.inference_mode():
                 output_ids = model.generate(
                     input_ids,
-                    images=image_tensor.to(dtype=torch.float16, device='cuda', non_blocking=True),
-                    image_sizes=image_sizes,
-                    texts=question,
-                    do_sample=True if args.temperature > 0 else False,
-                    temperature=args.temperature,
-                    top_p=args.top_p,
-                    num_beams=args.num_beams,
-                    max_new_tokens=args.max_new_tokens,
-                    use_cache=True)
-        else:     
-            with torch.inference_mode():
-                output_ids = model.generate(
-                    input_ids,
-                    images=image_tensor.to(dtype=torch.float16, device='cuda', non_blocking=True),
-                    image_sizes=image_sizes,
-                    do_sample=True if args.temperature > 0 else False,
-                    temperature=args.temperature,
-                    top_p=args.top_p,
-                    num_beams=args.num_beams,
-                    max_new_tokens=args.max_new_tokens,
-                    use_cache=True)
+                    **generation_kwargs,
+                )
+
+            latency = profiler.stop()
+            torch.cuda.synchronize()
+
+        except Exception:
+            profiler.enabled = False
+            raise
+
+        latency["question_id"] = idx
+        latency["generated_tokens"] = int(output_ids.shape[1])
+        latency["peak_memory_gib"] = (
+            torch.cuda.max_memory_allocated() / (1024 ** 3)
+        )
+
+        latencies.append(latency)
+
+        lat_file.write(json.dumps(latency) + "\n")
+        lat_file.flush()
 
         outputs = tokenizer.batch_decode(output_ids, skip_special_tokens=True)[0].strip()
 
         ans_id = shortuuid.uuid()
         ans_file.write(json.dumps({"question_id": idx,
-                                   "prompt": cur_prompt,
-                                   "text": outputs,
-                                   "answer_id": ans_id,
-                                   "model_id": model_name,
-                                   "metadata": {}}) + "\n")
-        # ans_file.flush()
+                                    "prompt": cur_prompt,
+                                    "text": outputs,
+                                    "answer_id": ans_id,
+                                    "model_id": model_name,
+                                    "metadata": {}}) + "\n")
     ans_file.close()
+
+    lat_file.close()
+    profiler.remove()
+
+    def avg(key):
+        import statistics
+        values = [
+            x[key]
+            for x in latencies
+            if x.get(key) is not None
+        ]
+        return (
+            float(statistics.mean(values))
+            if values
+            else None
+        )
+
+    total_decode_ms = sum(x["decode_ms"] for x in latencies)
+
+    total_decode_steps = sum(x["decode_steps"] for x in latencies)
+
+    summary = {
+        "model": model_name,
+        "num_samples": len(latencies),
+        "num_chunks": args.num_chunks,
+        "chunk_idx": args.chunk_idx,
+
+        "prefill_ms": avg("prefill_ms"),
+        "llm_prefill_ms": avg("llm_prefill_ms"),
+
+        "decode_tpot_ms": (
+            total_decode_ms / total_decode_steps
+            if total_decode_steps > 0
+            else None
+        ),
+
+        "decode_total_ms": avg("decode_ms"),
+        "total_forward_ms": avg("total_forward_ms"),
+
+        "mean_generated_tokens": avg("generated_tokens"),
+        "mean_decode_steps": avg("decode_steps"),
+
+        "peak_memory_gib": max(
+            x["peak_memory_gib"]
+            for x in latencies
+        ),
+    }
+
+    summary_path = (
+        answers_file + ".latency_summary.json"
+    )
+
+    with open(summary_path, "w") as f:
+        json.dump(summary, f, indent=4)
+
+    print("\n" + "=" * 60)
+    print("⏱️ LLaVA Latency Summary")
+    print("=" * 60)
+    for key, value in summary.items():
+        print(f"{key}: {value}")
+    print("=" * 60)
+
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

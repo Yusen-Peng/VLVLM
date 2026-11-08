@@ -1,14 +1,15 @@
 #!/bin/bash
-#SBATCH --job-name=1106_MME_LLaVA_7B_FLASH_finetune_ALL_ONCE_full
-#SBATCH --output=1106_MME_LLaVA_7B_FLASH_finetune_ALL_ONCE_full.log
+#SBATCH --job-name=1106_MME_LLaVA_7B_SparseVLM_profile
+#SBATCH --output=1106_MME_LLaVA_7B_SparseVLM_profile.log
 #SBATCH --time=00:20:00
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --partition=debug-nextgen
+#SBATCH --partition=nextgen
 #SBATCH --gpus-per-node=1
 #SBATCH --cpus-per-task=16
 #SBATCH --mem=128G
 #SBATCH --account=PAS2836
+#SBATCH --exclude=a0334,a0233
 
 module load miniconda3/24.1.2-py310
 conda activate DRIP_flash
@@ -19,7 +20,7 @@ export MASTER_PORT=$((12000 + RANDOM % 20000))
 
 cd /users/PAS2912/yusenpeng/DRIP/
 
-VERSION="1106_MME_LLaVA_7B_FLASH_finetune_ALL_ONCE_full"
+VERSION="1106_MME_LLaVA_7B_SparseVLM_profile"
 
 python src/model_vqa_loader.py \
     --model-path /fs/scratch/PAS2836/yusenpeng_checkpoint/LLaVA_7B_FLASH_finetune_ALL_ONCE_full  \

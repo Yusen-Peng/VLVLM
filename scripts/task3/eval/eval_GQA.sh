@@ -1,14 +1,16 @@
 #!/bin/bash
-#SBATCH --job-name=1106_GQA_LLaVA_7B_FLASH_finetune_ALL_ONCE_full
-#SBATCH --output=1106_GQA_LLaVA_7B_FLASH_finetune_ALL_ONCE_full.log
+#SBATCH --job-name=1106_GQA_LLaVA_7B_SparseVLM_profile
+#SBATCH --output=1106_GQA_LLaVA_7B_SparseVLM_profile.log
 #SBATCH --time=01:00:00
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --partition=debug-nextgen
+#SBATCH --partition=nextgen
 #SBATCH --gpus-per-node=1
 #SBATCH --cpus-per-task=16
 #SBATCH --mem=128G
 #SBATCH --account=PAS2836
+#SBATCH --exclude=a0334,a0233
+
 
 module load miniconda3/24.1.2-py310
 conda activate DRIP_flash
@@ -24,7 +26,7 @@ GQADIR="/fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/GQA/data"
 OUTPUT_DIR=/fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/GQA/answers/llava_gqa_testdev_balanced
 mkdir -p $OUTPUT_DIR
 
-OUTPUT_FILE=$OUTPUT_DIR/1106_LLaVA_7B_FLASH_finetune_ALL_ONCE_full.jsonl
+OUTPUT_FILE=$OUTPUT_DIR/1106_GQA_LLaVA_7B_SparseVLM_profile.jsonl
 
 
 
