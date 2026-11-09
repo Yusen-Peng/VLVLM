@@ -23,7 +23,7 @@ def build_vision_tower(vision_tower_cfg, **kwargs):
     INFERENCE_MODE = True
 
 
-    MERGE_STRATEGY = "SparseVLM"
+    MERGE_STRATEGY = "ViT"
     RELEVANCE_ALPHA = 0.25
 
     # main result: 2x - 0.5, 4x - 0.25, 8x - 0.125, 10x - 0.1
