@@ -48,12 +48,4 @@ We report LLM prefill latency in miliseconds for Qwen3VL on multiple benchmarks 
 | **VLVLM (ours)** | 58.45 | 54.00 | 63.02 |
 
 
-<!-- Qwen3VL benchmark runtime (I/O bound):
-
-| method | OCRBench | ChartQAPro |
-| ------ | -------- | ---------- |
-| original | 483 sec / 1000 samples | 893 sec / 1948 samples |
-| 4x compression |
-| PruneSID | 460 sec / 1000 samples | 872 sec / 1948 samples | 
-| VLVLM | 470 sec / 1000 samples | 844 sec / 1948 samples | -->
 
