@@ -1,6 +1,6 @@
 #!/bin/bash
-#SBATCH --job-name=1016_ChartQAPro_LLaVA_7B_DRIPpp_4x_alpha10
-#SBATCH --output=1016_ChartQAPro_LLaVA_7B_DRIPpp_4x_alpha10.log
+#SBATCH --job-name=1111_ChartQAPro_LLaVA_7B_TokenPacker_4x
+#SBATCH --output=1111_ChartQAPro_LLaVA_7B_TokenPacker_4x.log
 #SBATCH --time=00:30:00
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -19,17 +19,17 @@ export TOKENIZERS_PARALLELISM=false
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 cd /users/PAS2912/yusenpeng/DRIP
 
-VERSION="LLaVA_7B_DRIPpp_4x_alpha10"
+VERSION="1111_ChartQAPro_LLaVA_7B_TokenPacker_4x"
 echo "Running LLaVA inference..."
 
 
-python src/model_vqa_chartqapro.py \
-  --model-path /fs/scratch/PAS2836/yusenpeng_checkpoint/LLaVA_7B_DRIP_4x_pretrain_NEW_DOWN_temp001_train_full \
-  --image-folder /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/chartvqapro/images \
-  --question-file /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/chartvqapro/chartqapro_test_llava.jsonl \
-  --answers-file /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/chartvqapro/results/${VERSION}.jsonl \
-  --temperature 0 \
-  --conv-mode llava_v1
+# python src/model_vqa_chartqapro.py \
+#   --model-path /fs/scratch/PAS2836/yusenpeng_checkpoint/LLaVA_7B_DRIP_4x_pretrain_NEW_DOWN_temp001_train_full \
+#   --image-folder /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/chartvqapro/images \
+#   --question-file /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/chartvqapro/chartqapro_test_llava.jsonl \
+#   --answers-file /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/chartvqapro/results/${VERSION}.jsonl \
+#   --temperature 0 \
+#   --conv-mode llava_v1
 
 # python src/model_vqa_chartqapro.py \
 #   --model-path /fs/scratch/PAS2836/yusenpeng_checkpoint/LLaVA_7B_SigLIP_HF_v2_DRIP_4x_temp001_new_downsample_train_full \
@@ -57,6 +57,14 @@ python src/model_vqa_chartqapro.py \
 #   --temperature 0 \
 #   --conv-mode llava_v1
 
+python src/model_vqa_chartqapro.py \
+  --model-path /fs/scratch/PAS2836/yusenpeng_checkpoint/LLaVA_7B_TokenPacker_4x_train_lora \
+  --model-base lmsys/vicuna-7b-v1.5 \
+  --image-folder /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/chartvqapro/images \
+  --question-file /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/chartvqapro/chartqapro_test_llava.jsonl \
+  --answers-file /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/chartvqapro/results/${VERSION}.jsonl \
+  --temperature 0 \
+  --conv-mode llava_v1
 
 python src/ChartQAPro_eval/eval_prediction.py \
   --predictions-file /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/chartvqapro/results/${VERSION}.jsonl \

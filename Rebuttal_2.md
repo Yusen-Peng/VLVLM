@@ -1,12 +1,15 @@
 We thanks for reviewer ``FQoK`` feedback and comments. Here is how we address the raised weaknesses and concerns:
 
-> Incomplete comparisons with training-based methods.
+> Incomplete comparisons with training-based methods. The evaluation primarily compares against training-free methods, while the training-based baselines are limited to Perceiver and fixed pooling. Several relevant training-based visual-token compression methods, such as TokenPacker[1], VisionSelector[2], MetaCompress[3], and EvoComp[4], are omitted, making it difficult to assess the effectiveness of VLVLM against existing alternatives.
+
+
 
 Most mentioned training-based baselines have their own limitations. *TokenPacker* is an alternative to the MLP projector in VLM architectures such as LLaVA and QwenVL. It is meant to replace the original projector in the VLM, which does not share the same purpose of our work. *LearnPruner*, *MetaCompress*, and *EvoComp* do not have open-sourced code implementation or artifacts, meaning that their results cannot be reproduced.
 
 
 
-> Insufficient ablations to isolate the benefits of variable-length grouping.
+> Insufficient ablations to isolate the benefits of variable-length grouping. The fixed-pooling baseline operates on flattened visual tokens, potentially overlooking spatial locality. At the minimum, comparisons against trained 2D spatial pooling would help establish whether the improvements specifically arise from adaptive grouping.
+
 
 We conduct experiments on training-based spatially local 2D pooling and here are the results on LLaVA 1.5:
 
@@ -25,7 +28,8 @@ We conduct experiments on training-based spatially local 2D pooling and here are
 The results demonstrate that 2D fixed pooling performs similarly as 1D fixed pooling, and our VLVLM maintains the best OCR-heavy task performance.
 
 
-> Weak benchmark performance.
+> Weak benchmark performance and severe degradation on modern VLMs. The evaluation relies heavily on LLaVA-1.5-7B, which achieves only 15–30% on benchmarks such as OCRBench and DocVQA, substantially below the 80–90% performance achieved by modern VLMs. Improvements of just 1–2 points in such a low-performing regime raise questions about their practical significance. More concerningly, adapting Qwen3-VL-4B (Table 4) results in severe performance degradation, with OCRBench dropping from 83.9 to 54.6 despite fine-tuning. These results raise serious concerns about the applicability of the proposed method to modern VLMs.
+
 
 In addition to five benchmarks in the main text, we also evaluate our method VLVLM against baselines on a more recent, real-world, high-resolution benchmark - MME-RealWorld:
 
@@ -43,23 +47,40 @@ In addition to five benchmarks in the main text, we also evaluate our method VLV
 | fixed pooling | 20.95 | **47.06** | 20.89 | 27.35 | 26.57 | 30.20 | 107.51% | 
 | VLVLM (ours) | **21.86** | 46.95 | **21.44** | **27.43** | **26.97** | **30.44** | **108.37%** |
 
-VLVLM outperforms other baselines such as PruMerge, PruneSID, and fixed pooling, under both moderate (i.e., 4$\times$) and aggressive (i.e., 8$\times$) compression budget, especially on tasks subsets like "OCR" and "Diagram and Table".
+VLVLM outperforms other baselines such as PruMerge, PruneSID, and fixed pooling, under both moderate (i.e., 4x) and aggressive (i.e., 8x) compression budget, especially on tasks subsets like "OCR" and "Diagram and Table".
 
-> severe degradation on modern VLMs such as Qwen3VL.
 
-In terms of degradation on modern VLMs such as Qwen3VL, since we target quite challenging tasks that involve OCR-heavy perception, we do expect performance degradation on these benchmarks with an additional moderate 4x compression. However, our method VLVLM is still able to outperform multiple state-of-the-art baselines, where we also add experiments of CDPruner in addition to PruneSID in the initial submission:
 
-| Model | TextVQA | OCRBench | OCRBenchv2 | ChartQAPro | Avg. Ret. | 
-| ----- | ------- | -------- | ---------- | ---------- | --------- |
-| Qwen3VL-4B | 77.99 | 85.5 | 68.4 | 26.57 | -- |
-| +SFT@ 65K | 81.49 | 83.9 | 67.2 | 27.89 | 100% |
+
+
+
+> Qwen3-VL already employs a learned 2×2 spatial token merger and supports native-resolution inputs. Can the authors report actual time-to-first-token (TTFT) or end-to-end prefill latency on OCRBench (or any other benchmark), comparing the original Qwen3-VL with VLVLM under identical conditions? It would be useful to report the image resolutions, visual-token counts, and latency breakdown between vision encoding and LLM prefill to establish the practical benefits of additional compression beyond Qwen3-VL's existing token reduction.
+
+
+We measure the LLM prefill latency to demonstrate the efficiency gain beyond FLOPs, spanning a diverse collection of benchmarks (TextVQA, DocVQA for OCR-heavy tasks, MME, GQA, POPE, AND MM-Vet or general VQA tasks): 
+
+| Method | MME | TextVQA | DocVQA | GQA | POPE | MM-Vet |
+| ------ | --- | ------- | ------ | --- | ---- | ------ |
+| LLaVA-1.5 7B | 60.02 | 65.79 | 57.37 | 59.31 | 55.59 | 55.72 |
 | 4x compression |
-| PruneSID | 71.23 | 49.9 | 46.7 | **23.16** | 74.85% |        
-| **CDPruner** | 73.15 | 51.8 | 49.1 | 18.98 | 73.16% | 
-| fixed pooling@65K | 70.50 | 51.1 | **51.3** | **19.58** | 73.49% |
-| VLVLM@65K | **76.20** | **54.6** | 51.2 | 19.08 | **75.80%** |
+| PruMerge | 29.82 | 32.12 | 29.17 | 29.37 | 29.42 | 29.83 |
+| PruneSID | 28.96 | 32.37 | 29.07 | 29.19 | 29.20 | 28.99 |
+| SparseVLM | 42.44 | 46.34 | 41.03 | 41.65 | 42.75 | 41.81 |
+| Fixed pooling | 29.81 | 33.34 | 29.93 | 30.03 | 30.03 | 29.73 |
+| VLVLM | 29.62 | 33.34 | 30.00 | 30.23 | 29.78 | 29.82 |
 
-> benchmark-level latency measures.
+Under 4x compression, most methods and baselines including VLVLM can reach up to **2x** prefill latency speedup with a single batch size; SparseVLM only reaches up to **1.5x** latency boost since it starts merging image tokens during the LLM layer.
 
-[COPY-PASTE]
+
+To validate the latency gains with more modern VLMs, we further measure the prefill latency improvement on multiple benchmarks including OCRBench, TextVQA, and ChartQAPro for Qwen3VL 4B model. We first conduct a profiling experiment on a single-sample (batch size = 1) setting, and VLVLM achieves similar prefill speedup as other baselines such as fixed pooling and PruneSID. To maximize GPU utilization, we also consider batched (batch size = 4) setting for inference, which is not supported by PruneSID. 
+VLVLM accelerates prefill latency similar to fixed pooling.
+
+| Method | OCRBench | TextVQA | ChartQAPro | OCRBench | TextVQA | ChartQAPro |
+| ------ | -------- | ------- | ---------- | -------- | ------- | ---------- |
+| batch size = 1 | | | | batch size = 4 |
+| Qwen3VL-4B | 92.02 | 69.50 | 131.79 | 406.78 | 299.09 | 830.45 |
+| 4x compression |
+| PruneSID | 57.77 | 53.54 | 63.62 | -- | -- | -- |
+| Fixed pooling | 57.76 | 53.87 | 63.49 | 123.85 | 147.11 | 216.54 |
+| VLVLM | 58.45 | 54.00 | 63.02 | 124.36 | 143.52 | 215.41 |
 
