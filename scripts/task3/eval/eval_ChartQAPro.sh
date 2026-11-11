@@ -1,6 +1,6 @@
 #!/bin/bash
-#SBATCH --job-name=1111_ChartQAPro_LLaVA_7B_TokenPacker_4x
-#SBATCH --output=1111_ChartQAPro_LLaVA_7B_TokenPacker_4x.log
+#SBATCH --job-name=1111_ChartQAPro_LLaVA_7B_TokenPacker_4x_to_9x
+#SBATCH --output=1111_ChartQAPro_LLaVA_7B_TokenPacker_4x_to_9x.log
 #SBATCH --time=00:30:00
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -19,7 +19,7 @@ export TOKENIZERS_PARALLELISM=false
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 cd /users/PAS2912/yusenpeng/DRIP
 
-VERSION="1111_ChartQAPro_LLaVA_7B_TokenPacker_4x"
+VERSION="1111_ChartQAPro_LLaVA_7B_TokenPacker_4x_to_9x"
 echo "Running LLaVA inference..."
 
 

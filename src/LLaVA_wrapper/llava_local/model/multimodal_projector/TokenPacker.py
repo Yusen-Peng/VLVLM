@@ -8,7 +8,7 @@ from torch.nn import functional as F
 import math
 
 
-SCALE_FACTOR = 2 # 2 for 4x compression, 3 for 9x compression
+SCALE_FACTOR = 3 # 2 for 4x compression, 3 for 9x compression
 
 class IdentityMap(nn.Module):
     def __init__(self):

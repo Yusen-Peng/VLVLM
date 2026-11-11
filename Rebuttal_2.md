@@ -4,7 +4,7 @@ We thanks for reviewer ``FQoK`` feedback and comments. Here is how we address th
 
 
 
-Most mentioned training-based baselines have their own limitations. *TokenPacker* is an alternative to the MLP projector in VLM architectures such as LLaVA and QwenVL. It is meant to replace the original projector in the VLM, which does not share the same purpose of our work. *LearnPruner*, *MetaCompress*, and *EvoComp* do not have open-sourced code implementation or artifacts, meaning that their results cannot be reproduced.
+Most mentioned training-based baselines have their own limitations. *LearnPruner*, *MetaCompress*, and *EvoComp* do not have open-sourced code implementation or artifacts, meaning that their results cannot be reproduced.
 
 
 
@@ -17,18 +17,26 @@ We conduct experiments on training-based spatially local 2D pooling and here are
 | ------ | ------- | -------- | ---------- | ------ | ---------- | --------------- |
 | LLaVA-1.5-7B | 58.16 | 18.5 | 23.8 | 25.61 | 12.04 | 100% |
 | 4x compression | 
-| fixed pooling | 55.74 | 15.7 | 20.9 | 18.78 | **11.10** | 86.80% |
-| **fixed (2D)** | 53.37 | 15.7 | **21.9** | 18.60 | 10.67 | 85.97% |
-| VLVLM (ours) | **55.84** | **16.5** | 20.9 | **20.39** | 10.91 | **88.65%** |
+| fixed pooling | 55.74 | 15.7 | 20.9 | 18.78 | 11.10 | 86.80% |
+| fixed (2D) | 53.37 | 15.7 | 21.9 | 18.60 | 10.67 | 85.97% |
+| VLVLM (ours) | 55.84 | 16.5 | 20.9 | 20.39 | 10.91 | 88.65% |
 | 8x compression |
 | fixed pooling | 54.05 | 14.3 | 19.5 | 16.00 | 10.81 | 80.88% | 
-| **fixed (2D)** | 51.54 | 13.6 | **20.4** | 16.30 | 9.39 | 77.89% |               
-| VLVLM (ours) | **55.05** | **15.6** | 20.1 | **17.59** | **10.94** | **84.59%** |
+| fixed (2D) | 51.54 | 13.6 | 20.4 | 16.30 | 9.39 | 77.89% |               
+| VLVLM (ours) | 55.05 | 15.6 | 20.1 | 17.59 | 10.94 | 84.59% |
 
 The results demonstrate that 2D fixed pooling performs similarly as 1D fixed pooling, and our VLVLM maintains the best OCR-heavy task performance.
 
 
 > Weak benchmark performance and severe degradation on modern VLMs. The evaluation relies heavily on LLaVA-1.5-7B, which achieves only 15–30% on benchmarks such as OCRBench and DocVQA, substantially below the 80–90% performance achieved by modern VLMs. Improvements of just 1–2 points in such a low-performing regime raise questions about their practical significance. More concerningly, adapting Qwen3-VL-4B (Table 4) results in severe performance degradation, with OCRBench dropping from 83.9 to 54.6 despite fine-tuning. These results raise serious concerns about the applicability of the proposed method to modern VLMs.
+
+
+
+
+
+
+
+
 
 
 In addition to five benchmarks in the main text, we also evaluate our method VLVLM against baselines on a more recent, real-world, high-resolution benchmark - MME-RealWorld:

@@ -1,6 +1,6 @@
 #!/bin/bash
-#SBATCH --job-name=1111_OCRBench_LLaVA_7B_TokenPacker_4x
-#SBATCH --output=1111_OCRBench_LLaVA_7B_TokenPacker_4x.log
+#SBATCH --job-name=1111_OCRBench_LLaVA_7B_TokenPacker_4x_to_9x
+#SBATCH --output=1111_OCRBench_LLaVA_7B_TokenPacker_4x_to_9x.log
 #SBATCH --time=00:40:00
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -19,7 +19,7 @@ export MASTER_PORT=$((12000 + RANDOM % 20000))
 
 cd /users/PAS2912/yusenpeng/DRIP/
 
-VERSION="LLaVA_7B_TokenPacker_4x"
+VERSION="LLaVA_7B_TokenPacker_4x_to_9x"
 
 # python src/model_vqa_ocrbench.py \
 #     --model_path /fs/scratch/PAS2836/yusenpeng_checkpoint/LLaVA_7B_DRIP_4x_pretrain_NEW_DOWN_temp001_train_full \

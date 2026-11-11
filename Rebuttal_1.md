@@ -35,13 +35,13 @@ For spatially local 2D pooling controls, we also conduct experiments on training
 | 4x compression | 
 | fixed pooling | 55.74 | 15.7 | 20.9 | 18.78 | 11.10 | 86.80% |
 | fixed (2D) | 53.37 | 15.7 | 21.9 | 18.60 | 10.67 | 85.97% |
-| VLVLM (ours) | 55.84 | 16.5** | 20.9 | 20.39 | 10.91 | 88.65% |
+| VLVLM (ours) | 55.84 | 16.5 | 20.9 | 20.39 | 10.91 | 88.65% |
 | 8x compression |
 | fixed pooling | 54.05 | 14.3 | 19.5 | 16.00 | 10.81 | 80.88% | 
 | fixed (2D) | 51.54 | 13.6 | 20.4 | 16.30 | 9.39 | 77.89% |               
 | VLVLM (ours) | 55.05 | 15.6 | 20.1| 17.59 | 10.94 | 84.59% |
 
-The results demonstrate that 2D fixed pooling performs similarly as 1D fixed pooling, and our VLVLM maintains the  best OCR-heavy task performance.
+The results demonstrate that 2D fixed pooling performs similarly as 1D fixed pooling, and our VLVLM maintains the best OCR-heavy task performance.
 
 
 > The fixed-pooling control is valuable, but PruMerge and PruneSID are still evaluated only as training-free methods. Since training–inference mismatch is central to the motivation, adapting those selectors with the same data and update budget is an especially relevant control. Perceiver does not fully resolve this issue because it changes the compression mechanism as well. LearnPruner is discussed but not directly compared. I would like at least one nonuniform selection or merging baseline with matched fine-tuning, to establish whether the advantage comes from variable-length consecutive grouping rather than primarily from adapting the language model to compressed inputs.
@@ -65,11 +65,10 @@ We measure the LLM prefill latency to demonstrate the efficiency gain beyond FLO
 | Fixed pooling | 29.81 | 33.34 | 29.93 | 30.03 | 30.03 | 29.73 |
 | VLVLM | 29.62 | 33.34 | 30.00 | 30.23 | 29.78 | 29.82 |
 
-Under 4x compression, most methods and baselines including VLVLM can reach up to **2x** prefill latency speedup with a single batch size; SparseVLM only reaches up to **1.5x** latency boost since it starts merging image tokens during the LLM layer. Note that for LLaVA, all images are resized into the 336x336 resolution, leading to a constant number of image tokens (576 with patch size 14).
+Under 4x compression, most methods and baselines including VLVLM can reach up to **2x** prefill latency speedup with a single batch size; SparseVLM only reaches up to **1.5x** latency boost since it starts merging image tokens during the LLM layer. Note that for LLaVA, all images are resized into the 336x336 resolution, leading to a constant number of image tokens to start with (576 with patch size 14).
 
 
-To validate the latency gains with more modern VLMs, we further measure the prefill latency improvement on multiple benchmarks including OCRBench, TextVQA, and ChartQAPro for Qwen3VL 4B model. We first conduct a profiling experiment on a single-sample (batch size = 1) setting, and VLVLM achieves similar prefill speedup as other baselines such as fixed pooling and PruneSID. To maximize GPU utilization, we also consider batched (batch size = 4) setting for inference, which is not supported by PruneSID. 
-VLVLM accelerates prefill latency similar to fixed pooling.
+To validate the latency gains with more modern VLMs, we further measure the prefill latency improvement on multiple benchmarks including OCRBench, TextVQA, and ChartQAPro for Qwen3VL 4B model. We first conduct a profiling experiment on a single-sample (batch size = 1) setting, and VLVLM achieves similar prefill speedup as other baselines such as fixed pooling and PruneSID. To maximize GPU utilization, we also consider batched (batch size = 4) setting for inference, which is not supported by PruneSID.
 
 | Method | OCRBench | TextVQA | ChartQAPro | OCRBench | TextVQA | ChartQAPro |
 | ------ | -------- | ------- | ---------- | -------- | ------- | ---------- |
