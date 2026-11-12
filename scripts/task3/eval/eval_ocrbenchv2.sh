@@ -1,10 +1,10 @@
 #!/bin/bash
-#SBATCH --job-name=1111_OCRBenchV2_LLaVA_7B_DRIP_4x_to_9x
-#SBATCH --output=1111_OCRBenchV2_LLaVA_7B_DRIP_4x_to_9x.log
+#SBATCH --job-name=1111_OCRBenchV2_LLaVA_7B_DRIP_10x_to_9x
+#SBATCH --output=1111_OCRBenchV2_LLaVA_7B_DRIP_10x_to_9x.log
 #SBATCH --time=3:00:00
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --partition=nextgen
+#SBATCH --partition=quad
 #SBATCH --gpus-per-node=1
 #SBATCH --cpus-per-task=16
 #SBATCH --mem=128G
@@ -20,11 +20,11 @@ export TOKENIZERS_PARALLELISM=false
 
 cd /users/PAS2912/yusenpeng/DRIP/
 
-VERSION="1111_OCRBenchV2_LLaVA_7B_DRIP_4x_to_9x"
+VERSION="1111_OCRBenchV2_LLaVA_7B_DRIP_10x_to_9x"
 
 
 python src/model_vqa_ocrbenchv2.py \
-    --model_path /fs/scratch/PAS2836/yusenpeng_checkpoint/LLaVA_7B_DRIP_4x_pretrain_NEW_DOWN_temp001_train_full \
+    --model_path /fs/scratch/PAS2836/yusenpeng_checkpoint/LLaVA_7B_DRIP_8x_pretrain_NEW_DOWN_temp10_train_full \
     --dataset_path lmms-lab/OCRBench-v2 \
     --dataset_split test \
     --cache_dir /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/ocrbenchv2 \

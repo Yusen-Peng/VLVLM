@@ -23,7 +23,7 @@ def build_vision_tower(vision_tower_cfg, **kwargs):
     INFERENCE_MODE = True
 
 
-    MERGE_STRATEGY = "ViT"
+    MERGE_STRATEGY = "DRIP"
     RELEVANCE_ALPHA = 0.25
 
     # main result: 2x - 0.5, 4x - 0.25, 8x - 0.125, 10x - 0.1 (9x - 0.112)
@@ -39,9 +39,9 @@ def build_vision_tower(vision_tower_cfg, **kwargs):
     PERCEIVER_WEIGHT_PATH = None
 
     # try finetuning with the new downsample function! 
-    DRIP_WEIGHT_PATH = "/fs/scratch/PAS2836/yusenpeng_checkpoint/LLaVA_7B_DRIP_4x_pretrain_NEW_DOWN_temp001_train_full/drip.bin"
+    # DRIP_WEIGHT_PATH = "/fs/scratch/PAS2836/yusenpeng_checkpoint/LLaVA_7B_DRIP_4x_pretrain_NEW_DOWN_temp001_train_full/drip.bin"
     # DRIP_WEIGHT_PATH = "/fs/scratch/PAS2836/yusenpeng_checkpoint/LLaVA_7B_DRIP_8x_pretrain_NEW_DOWN_temp10_train_full/drip.bin"
-    # DRIP_WEIGHT_PATH = "/fs/scratch/PAS2836/yusenpeng_checkpoint/LLaVA_7B_DRIP_10x_pretrain_NEW_DOWN_temp10_train_full/drip.bin"
+    DRIP_WEIGHT_PATH = "/fs/scratch/PAS2836/yusenpeng_checkpoint/LLaVA_7B_DRIP_10x_pretrain_NEW_DOWN_temp10_train_full/drip.bin"
     
     
     # DRIP_WEIGHT_PATH = "/fs/scratch/PAS2836/yusenpeng_checkpoint/LLaVA_Qwen2.5-14B-Instruct_DRIP_4x_pretrain_NEW_DOWN_temp001_train_full/drip.bin"
