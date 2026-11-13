@@ -24,10 +24,10 @@ For training-free baselines, in addition to *prompt-agnostic* PruMerge and Prune
 | LLaVA-1.5-7B | 58.16 | 18.5 | 23.8 | 25.61 | 12.04 | 100% |
 | 4x compression | 
 | SparseVLM | 55.10 | 15.2 | 21.3 | 17.33 | 11.46 | 85.85% |
-| VLVLM (ours) | 55.84 | 16.5 | 20.9 | 20.39 | 10.91 | 88.65% |
+| VLVLM (ours) | 55.84 | 16.5 | 20.9 | 20.39 | 10.91 | **88.65%** |
 | 8x compression |
 | SparseVLM | 52.93 | 11.0 | 18.2 | 11.62 | 10.98 | 72.70% |
-| VLVLM (ours) | 55.05 | 15.6 | 20.1 | 17.59 | 10.94 | 84.59% |
+| VLVLM (ours) | 55.05 | 15.6 | 20.1 | 17.59 | 10.94 | **84.59%** |
  
 Note that our VLVLM consistently outperforms SparseVLM method, where we observe significant gains under aggressive compression budget (8x). 
 
@@ -39,15 +39,27 @@ For training-based baselines, other than our default 1D fixed pooling, we extend
 | 4x compression | 
 | fixed pooling | 55.74 | 15.7 | 20.9 | 18.78 | 11.10 | 86.80% |
 | fixed (2D) | 53.37 | 15.7 | 21.9 | 18.60 | 10.67 | 85.97% |
-| VLVLM (ours) | 55.84 | 16.5 | 20.9 | 20.39 | 10.91 | 88.65% |
+| VLVLM (ours) | 55.84 | 16.5 | 20.9 | 20.39 | 10.91 | **88.65%** |
 | 8x compression |
 | fixed pooling | 54.05 | 14.3 | 19.5 | 16.00 | 10.81 | 80.88% |
 | fixed (2D) | 51.54 | 13.6 | 20.4 | 16.30 | 9.39 | 77.89% |               
-| VLVLM (ours) | 55.05 | 15.6 | 20.1 | 17.59 | 10.94 | 84.59% |
+| VLVLM (ours) | 55.05 | 15.6 | 20.1 | 17.59 | 10.94 | **84.59%** |
 
 The results demonstrate that 2D fixed pooling performs similarly as 1D fixed pooling, and our VLVLM maintains the best OCR-heavy task performance.
 
-[MAYBE-ADD-TOKENPACKER-HERE]
+We also compare our VLVLM with another training-based baseline, TokenPacker. Note that unlike our VLVLM, TokenPacker is inflexible: it does not support any arbitrary compression ratio because it operates on a square-sized fixed window with cross attention on image features from intermediate vision encoder layers. Therefore, we compare under both 4x (i.e., 2x2) and 9x (i.e., 3x3) compression. For 9x compression, we use 8x trained checkpoint for VLVLM to evaluate on 9x to match the same inference budget while avoiding retraining.
+
+| Model | TextVQA | OCRBench | OCRBenchv2 | DocVQA | ChartQAPro | Avg. Ret. | TFLOPs | 
+| ----- | ------- | -------- | ---------- | ------ | ---------- | --------- | ------ |
+| LLaVA-1.5-7B | 58.16 | 18.5 | 23.8 | 25.61 | 12.04 | 100% | 8.89 |      
+| 4x compression |
+| TokenPacker | 55.23 | 16.8 | 22.1 | 19.77 | 9.02 | 86.15% | 3.18 |
+| VLVLM (ours) | 55.84 | 16.5 | 20.9 | 20.39 | 10.91 | **88.65%** | 3.18 |
+| 9x compression |
+| TokenPacker | 53.25 | 15.1 | 20.6 | 16.78 | 9.63 | 81.05% | 2.23 |
+| VLVLM (ours) | 54.77 | 15.1 | 20.4 | 17.42 | 10.90 | **84.01%** | 2.23 |
+
+We observe that VLVLM outperforms TokenPacker on average, especially under 9x compression.
 
 ### Prefill latency improvement
 
@@ -102,18 +114,19 @@ We also evaluate our method VLVLM against baselines on a more recent, real-world
 | PruMerge | 19.31 | 42.65 | 20.27 | 26.94 | 22.63 | 27.87 | 99.22% |
 | PruneSID | 19.03 | 43.14 | 20.61 | 26.64 | 28.09 | 28.12 | 100.11% |
 | fixed pooling | 21.95 | 44.16 | 20.43 | 26.20 | 24.48 | 28.69 | 102.14% |
-| VLVLM (ours) | 20.26 | 48.24 | 21.79 | 27.49 | 26.86 | 30.77 | 109.54% |
+| VLVLM (ours) | 20.26 | 48.24 | 21.79 | 27.49 | 26.86 | 30.77 | **109.54%** |
 | 8x compression |
 | PruMerge | 19.31 | 42.46 | 20.27 | 26.97 | 22.66 | 27.82 | 99.04% |
 | PruneSID | 19.31 | 42.89 | 20.49 | 26.64 | 22.74 | 28.03 | 99.79% |
 | fixed pooling | 20.95 | 47.06 | 20.89 | 27.35 | 26.57 | 30.20 | 107.51% | 
-| VLVLM (ours) | 21.86 | 46.95 | 21.44 | 27.43 | 26.97 | 30.44 | 108.37% |
+| VLVLM (ours) | 21.86 | 46.95 | 21.44 | 27.43 | 26.97 | 30.44 | **108.37%** |
 
 VLVLM outperforms other baselines such as PruMerge, PruneSID, and fixed pooling, under both moderate (4x) and aggressive (8x) compression budgets, especially on tasks subsets like "OCR" and "Diagram and Table". More importantly, both our method VLVLM and fixed pooling baseline actually **exceed the performance of original, uncompressed LLaVA**, highlighting favorable practical use cases.
 
 ### References
 
 [1] DeepStack: Deeply Stacking Visual Tokens is Surprisingly Simple and Effective for LMMs, NeurIPS 2024.
+
 [2] MME-RealWorld: Could Your Multimodal LLM Challenge High-Resolution Real-World Scenarios that are Difficult for Humans?, ICLR 2025.
 
 
@@ -145,26 +158,19 @@ hard_boundaries = hard_boundaries - soft_boundaries.detach() + soft_boundaries
 
 > In my view, Table 5’s text coverage indicates where chunk endpoints fall, not directly how much text information survives pooling. VLVLM averages non-boundary tokens too; an endpoint on text does not guarantee that the corresponding chunk avoids substantial background mixing. The paper itself finds that PruneSID sometimes has higher coverage but worse task performance. I would like chunk-length and text/background-mixing statistics for text-containing chunks, plus trained random variable-length boundaries or spatially local 2D pooling controls. Appendix E already acknowledges vertical-text failures; checking row boundaries and scan order would make the semantic-boundary interpretation more convincing.
 
-Although our proposed VLVLM leads to background mixing due to the nature of token pooling, many more boundary tokens still end up being predicted around text-heavy regions, preserving its strong OCR-related task performance. Additionally, mixing the background is *not necessarily a weakness*: depending on the question prompt, it will be beneficial not to discard the background completely [TO-CITE].
+Although our proposed VLVLM leads to background mixing due to the nature of token pooling, many more boundary tokens still end up being predicted around text-heavy regions, preserving its strong OCR-related task performance. Additionally, mixing the background is *not necessarily a weakness*: depending on the question prompt, it will be beneficial not to discard the background completely.
 
 For spatially local 2D pooling controls, we also conduct experiments on training-based spatially local 2D pooling. Please feel free to refer to our General Comments "A broader coverage of training-free and training-based baselines", where our results demonstrate that 2D fixed pooling performs similarly as 1D fixed pooling, and our VLVLM maintains the best OCR-heavy task performance.
 
 
 > The fixed-pooling control is valuable, but PruMerge and PruneSID are still evaluated only as training-free methods. Since training–inference mismatch is central to the motivation, adapting those selectors with the same data and update budget is an especially relevant control. Perceiver does not fully resolve this issue because it changes the compression mechanism as well. LearnPruner is discussed but not directly compared. I would like at least one nonuniform selection or merging baseline with matched fine-tuning, to establish whether the advantage comes from variable-length consecutive grouping rather than primarily from adapting the language model to compressed inputs.
 
-[WAIT-ON-TOKENPACKER]
+For training-based baselines, other than our default 1D fixed pooling, we extend our experiments on spatially local 2D pooling. We also compare with another training-based baseline, TokenPacker. Please feel free to refer to our General Comments "A broader coverage of training-free and training-based baselines" for results. LearnPruner is discussed but not directly compared because their code is not public available and its results cannot be reproduced. PruMerge and PruneSID are proposed as mainly training-free methods: PruMerge finetuning only leads to marginal gains according to what the paper reports (only 0.1% gain on POPE benchmark), and PruneSID does not even support training, limiting its practical training use cases.
 
 
 > The FLOPs, KV-cache, and memory results in Appendix C are useful, but Table 8’s 55-to-30-hour comparison mainly measures training with versus without FlashAttention, not inference acceleration over baselines using the same backend. Algorithm 3 also constructs a token-to-segment assignment matrix, and it is unclear whether the implementation uses a more efficient segmented reduction. Please report time to first token, end-to-end latency at fixed generation lengths, and the predictor/pooling overhead under matched settings, particularly for high-resolution Qwen3VL. This would establish whether the arithmetic savings translate into deployment benefits.
 
 Please feel free to refer to our General Comments "Prefill latency improvement", where we measure the prefill latency gains on both LLaVA and Qwen3VL across multiple baselines and benchmarks. Under 4x compression, most methods and baselines including our VLVLM can reach up to **2x** prefill latency speedup, for both LLaVA 1.5 7B and Qwen3VL 4B.
-
-
-## References
-
-
-
-
 
 
 Thank you again for your effort to review our work. We hope you could spend some time reviewing our rebuttal, and we are always happy to further clarify anything needed. If our rebuttal can address your concerns, we would appreciate it if you may reflect that in an updated score.
@@ -179,7 +185,7 @@ We thanks for reviewer ``FQoK`` feedback and comments. Here is how we address th
 
 > Incomplete comparisons with training-based methods. The evaluation primarily compares against training-free methods, while the training-based baselines are limited to Perceiver and fixed pooling. Several relevant training-based visual-token compression methods, such as TokenPacker[1], VisionSelector[2], MetaCompress[3], and EvoComp[4], are omitted, making it difficult to assess the effectiveness of VLVLM against existing alternatives.
 
-Most mentioned training-based baselines have their own limitations. *LearnPruner*, *MetaCompress*, and *EvoComp* do not have open-sourced code implementation or artifacts, meaning that their results cannot be reproduced. Additionally, [WAIT-ON-TOKENPACKER]
+Most mentioned training-based baselines have their own limitations. *LearnPruner*, *MetaCompress*, and *EvoComp* do not have open-sourced code implementation or artifacts, meaning that their results cannot be reproduced. Additionally, we compare with another training-based baseline, TokenPacker. Please feel free to refer to our General Comments "A broader coverage of training-free and training-based baselines" for results.
 
 
 > Insufficient ablations to isolate the benefits of variable-length grouping. The fixed-pooling baseline operates on flattened visual tokens, potentially overlooking spatial locality. At the minimum, comparisons against trained 2D spatial pooling would help establish whether the improvements specifically arise from adaptive grouping.
@@ -246,9 +252,7 @@ Please feel free to refer to our General Comments "Prefill latency improvement",
 
 > Coverage of competitive baselines: Could you justify the limited coverage of recent learned visual token compression methods? Which representative methods are most directly comparable, and does existing evidence support the reported accuracy-efficiency advantage when model checkpoints, token budgets, training data, adaptation budgets, and evaluation conditions are aligned?
 
-You can feel free to refer to our General Comments "A broader coverage of training-free and training-based baselines". For training-free baselines, in addition to *prompt-agnostic* PruMerge and PruneSID, we also conduct experiments with one *prompt-aware* training-free baseline, SparseVLM. We find that our VLVLM consistently outperforms SparseVLM method, where we observe significant gains under aggressive compression budget (8x). For training-based baselines, other than our default 1D fixed pooling, we extend our experiments on spatially local 2D pooling. The results demonstrate that 2D fixed pooling performs similarly as 1D fixed pooling, and our VLVLM maintains the best OCR-heavy task performance. 
-
-[TOKENPACKER?]
+You can feel free to refer to our General Comments "A broader coverage of training-free and training-based baselines". For training-free baselines, in addition to *prompt-agnostic* PruMerge and PruneSID, we also conduct experiments with one *prompt-aware* training-free baseline, SparseVLM. We find that our VLVLM consistently outperforms SparseVLM method, where we observe significant gains under aggressive compression budget (8x). For training-based baselines, other than our default 1D fixed pooling, we extend our experiments on spatially local 2D pooling. The results demonstrate that 2D fixed pooling performs similarly as 1D fixed pooling, and our VLVLM maintains the best OCR-heavy task performance. We also compare with another training-based baseline, TokenPacker. Please feel free to refer to our General Comments "A broader coverage of training-free and training-based baselines" for results.
 
 
 Thank you again for your effort to review our work. We hope you could spend some time reviewing our rebuttal, and we are always happy to further clarify anything needed. If our rebuttal can address your concerns, we would appreciate it if you may reflect that in an updated score.

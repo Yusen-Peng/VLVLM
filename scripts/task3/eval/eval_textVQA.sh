@@ -1,6 +1,6 @@
 #!/bin/bash
-#SBATCH --job-name=1111_TextVQA_LLaVA_7B_DRIP_10x_to_9x
-#SBATCH --output=1111_TextVQA_LLaVA_7B_DRIP_10x_to_9x.log
+#SBATCH --job-name=1112_TextVQA_LLaVA_7B_TokenPacker_9x
+#SBATCH --output=1112_TextVQA_LLaVA_7B_TokenPacker_9x.log
 #SBATCH --time=00:55:00
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -17,17 +17,17 @@ source activate DRIP_flash
 export OMP_NUM_THREADS=16
 export MASTER_PORT=$((12000 + RANDOM % 20000))
 
-VERSION="1111_TextVQA_LLaVA_7B_DRIP_10x_to_9x"
+VERSION="1112_TextVQA_LLaVA_7B_TokenPacker_9x"
 
 cd /users/PAS2912/yusenpeng/DRIP/
 
-python src/model_vqa_loader.py \
-    --model-path /fs/scratch/PAS2836/yusenpeng_checkpoint/LLaVA_7B_DRIP_8x_pretrain_NEW_DOWN_temp10_train_full \
-    --question-file /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/textVQA/llava_textvqa_val_v051_ocr.jsonl \
-    --image-folder /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/textVQA/train_images \
-    --answers-file /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/textVQA/answers/${VERSION}.jsonl \
-    --temperature 0 \
-    --conv-mode vicuna_v1
+# python src/model_vqa_loader.py \
+#     --model-path /fs/scratch/PAS2836/yusenpeng_checkpoint/LLaVA_7B_DRIP_8x_pretrain_NEW_DOWN_temp10_train_full \
+#     --question-file /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/textVQA/llava_textvqa_val_v051_ocr.jsonl \
+#     --image-folder /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/textVQA/train_images \
+#     --answers-file /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/textVQA/answers/${VERSION}.jsonl \
+#     --temperature 0 \
+#     --conv-mode vicuna_v1
 
 # python src/model_vqa_loader.py \
 #     --model-path /fs/scratch/PAS2836/yusenpeng_checkpoint/LLaVA_7B_SigLIP_HF_v2_DRIP_4x_temp001_new_downsample_train_full \
@@ -58,14 +58,14 @@ python src/model_vqa_loader.py \
 #     --conv-mode vicuna_v1
 
 
-# python src/model_vqa_loader.py \
-#     --model-path /fs/scratch/PAS2836/yusenpeng_checkpoint/LLaVA_7B_TokenPacker_4x_train_lora \
-#     --model-base lmsys/vicuna-7b-v1.5 \
-#     --question-file /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/textVQA/llava_textvqa_val_v051_ocr.jsonl \
-#     --image-folder /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/textVQA/train_images \
-#     --answers-file /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/textVQA/answers/${VERSION}.jsonl \
-#     --temperature 0 \
-#     --conv-mode vicuna_v1
+python src/model_vqa_loader.py \
+    --model-path /fs/scratch/PAS2836/yusenpeng_checkpoint/LLaVA_7B_TokenPacker_9x_train_lora \
+    --model-base lmsys/vicuna-7b-v1.5 \
+    --question-file /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/textVQA/llava_textvqa_val_v051_ocr.jsonl \
+    --image-folder /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/textVQA/train_images \
+    --answers-file /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/textVQA/answers/${VERSION}.jsonl \
+    --temperature 0 \
+    --conv-mode vicuna_v1
 
 
 python src/eval_textvqa.py \
