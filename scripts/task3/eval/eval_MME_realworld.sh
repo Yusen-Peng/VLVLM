@@ -1,10 +1,10 @@
 #!/bin/bash
-#SBATCH --job-name=MMERealWorld_LLaVA_7B_ORIGINAL
-#SBATCH --output=MMERealWorld_LLaVA_7B_ORIGINAL.log
-#SBATCH --time=01:20:00
+#SBATCH --job-name=MMERealWorld_LLaVA_7B_TokenPacker_4x
+#SBATCH --output=MMERealWorld_LLaVA_7B_TokenPacker_4x.log
+#SBATCH --time=01:00:00
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --partition=nextgen
+#SBATCH --partition=debug-nextgen
 #SBATCH --gpus-per-node=1
 #SBATCH --cpus-per-task=16
 #SBATCH --mem=128G
@@ -19,10 +19,20 @@ export MASTER_PORT=$((12000 + RANDOM % 20000))
 
 cd /users/PAS2912/yusenpeng/DRIP/
 
-VERSION="LLaVA_7B_ORIGINAL"
+VERSION="LLaVA_7B_TokenPacker_4x"
+
+# python src/model_vqa_mme_real_world.py \
+#     --model-path /fs/scratch/PAS2836/yusenpeng_checkpoint/LLaVA_7B_FLASH_finetune_ALL_ONCE_full \
+#     --question-file /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/MMErealworld/MME-RealWorld.json \
+#     --image-folder /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/MMErealworld/images \
+#     --answers-file /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/MMErealworld/answers/${VERSION}.jsonl \
+#     --temperature 0 \
+#     --conv-mode vicuna_v1
+
 
 python src/model_vqa_mme_real_world.py \
-    --model-path /fs/scratch/PAS2836/yusenpeng_checkpoint/LLaVA_7B_FLASH_finetune_ALL_ONCE_full \
+    --model-path /fs/scratch/PAS2836/yusenpeng_checkpoint/LLaVA_7B_TokenPacker_4x_train_lora \
+    --model-base lmsys/vicuna-7b-v1.5 \
     --question-file /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/MMErealworld/MME-RealWorld.json \
     --image-folder /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/MMErealworld/images \
     --answers-file /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/MMErealworld/answers/${VERSION}.jsonl \
