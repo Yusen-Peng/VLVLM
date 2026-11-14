@@ -1,6 +1,6 @@
 #!/bin/bash
-#SBATCH --job-name=1028_Qwen3VL_SFT_PruneSID_4x
-#SBATCH --output=1028_Qwen3VL_SFT_PruneSID_4x.log
+#SBATCH --job-name=1113_Qwen3VL_SFT_DRIP_4x_wo_train
+#SBATCH --output=1113_Qwen3VL_SFT_DRIP_4x_wo_train.log
 #SBATCH --time=00:45:00
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -19,7 +19,7 @@ export TOKENIZERS_PARALLELISM=false
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 cd /users/PAS2912/yusenpeng/DRIP/QwenVL/qwen-vl-finetune/qwenvl
 
-VERSION="1028_Qwen3VL_SFT_PruneSID_4x"
+VERSION="1113_Qwen3VL_SFT_DRIP_4x_wo_train"
 echo "Running LLaVA inference..."
 
 
@@ -32,16 +32,16 @@ echo "Running LLaVA inference..."
 #   --conv-mode llava_v1
 
 
-python eval_code/model_vqa_chartqapro.py \
-  --model-path /fs/scratch/PAS2836/yusenpeng_checkpoint/Qwen3VL_SFT_10 \
-  --model-base Qwen/Qwen3-VL-4B-Instruct \
-  --image-folder /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/chartvqapro/images \
-  --question-file /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/chartvqapro/chartqapro_test_llava.jsonl \
-  --answers-file /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/chartvqapro/results/${VERSION}.jsonl \
-  --temperature 0 \
-  --conv-mode llava_v1 \
-  --merge-strategy PruneSID \
-  --compression-rate 0.25
+# python eval_code/model_vqa_chartqapro.py \
+#   --model-path /fs/scratch/PAS2836/yusenpeng_checkpoint/Qwen3VL_SFT_10 \
+#   --model-base Qwen/Qwen3-VL-4B-Instruct \
+#   --image-folder /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/chartvqapro/images \
+#   --question-file /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/chartvqapro/chartqapro_test_llava.jsonl \
+#   --answers-file /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/chartvqapro/results/${VERSION}.jsonl \
+#   --temperature 0 \
+#   --conv-mode llava_v1 \
+#   --merge-strategy PruneSID \
+#   --compression-rate 0.25
 
 
 # python eval_code/model_vqa_chartqapro.py \
@@ -108,6 +108,21 @@ python eval_code/model_vqa_chartqapro.py \
 #   --compression-rate 0.25 \
 #   --drip-path /fs/scratch/PAS2836/yusenpeng_checkpoint/Qwen3VL_SFT_DRIP_4x_NEW_PIPELINE_transfer/drip.bin \
 #   --mlp-ratio 4.0
+
+
+python eval_code/model_vqa_chartqapro.py \
+  --model-path /fs/scratch/PAS2836/yusenpeng_checkpoint/Qwen3VL_SFT_10 \
+  --model-base Qwen/Qwen3-VL-4B-Instruct \
+  --image-folder /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/chartvqapro/images \
+  --question-file /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/chartvqapro/chartqapro_test_llava.jsonl \
+  --answers-file /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/chartvqapro/results/${VERSION}.jsonl \
+  --temperature 0 \
+  --conv-mode llava_v1 \
+  --merge-strategy DRIP \
+  --compression-rate 0.25 \
+  --drip-path /fs/scratch/PAS2836/yusenpeng_checkpoint/Qwen3VL_SFT_DRIP_4x_NEW_PIPELINE_transfer/drip.bin \
+  --mlp-ratio 4.0
+
 
 
 
