@@ -1,10 +1,10 @@
 #!/bin/bash
-#SBATCH --job-name=1106_MME_LLaVA_7B_SparseVLM_profile
-#SBATCH --output=1106_MME_LLaVA_7B_SparseVLM_profile.log
+#SBATCH --job-name=1116_MME_LLaVA_7B_CDPruner_profile
+#SBATCH --output=1116_MME_LLaVA_7B_CDPruner_profile.log
 #SBATCH --time=00:20:00
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --partition=nextgen
+#SBATCH --partition=debug-nextgen
 #SBATCH --gpus-per-node=1
 #SBATCH --cpus-per-task=16
 #SBATCH --mem=128G
@@ -20,7 +20,7 @@ export MASTER_PORT=$((12000 + RANDOM % 20000))
 
 cd /users/PAS2912/yusenpeng/DRIP/
 
-VERSION="1106_MME_LLaVA_7B_SparseVLM_profile"
+VERSION="1116_MME_LLaVA_7B_CDPruner_profile"
 
 python src/model_vqa_loader.py \
     --model-path /fs/scratch/PAS2836/yusenpeng_checkpoint/LLaVA_7B_FLASH_finetune_ALL_ONCE_full  \

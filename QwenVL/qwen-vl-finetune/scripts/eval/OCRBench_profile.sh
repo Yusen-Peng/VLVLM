@@ -1,7 +1,7 @@
 #!/bin/bash
-#SBATCH --job-name=1028_OCRBench_Qwen3VL_SFT_Fixed_profile
-#SBATCH --output=1028_OCRBench_Qwen3VL_SFT_Fixed_profile.log
-#SBATCH --time=00:20:00
+#SBATCH --job-name=1028_OCRBench_Qwen3VL_SFT_CDPruner_profile
+#SBATCH --output=1028_OCRBench_Qwen3VL_SFT_CDPruner_profile.log
+#SBATCH --time=00:30:00
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --partition=debug-nextgen
@@ -18,7 +18,7 @@ export MASTER_PORT=$((12000 + RANDOM % 20000))
 
 cd /users/PAS2912/yusenpeng/DRIP/QwenVL/qwen-vl-finetune/qwenvl
 
-VERSION="1028_OCRBench_Qwen3VL_SFT_Fixed_profile"
+VERSION="1028_OCRBench_Qwen3VL_SFT_CDPruner_profile"
 
 # python eval_code/model_vqa_ocrbench_profile.py \
 #     --model_path /fs/scratch/PAS2836/yusenpeng_checkpoint/Qwen3VL_SFT_10 \
@@ -46,6 +46,8 @@ VERSION="1028_OCRBench_Qwen3VL_SFT_Fixed_profile"
 #     --save_name ${VERSION}_latency \
 #     --measure-latency
 
+
+
 python eval_code/model_vqa_ocrbench_profile.py \
     --model_path /fs/scratch/PAS2836/yusenpeng_checkpoint/Qwen3VL_SFT_10 \
     --model_base Qwen/Qwen3-VL-4B-Instruct \
@@ -55,10 +57,26 @@ python eval_code/model_vqa_ocrbench_profile.py \
     --OCRBench_file /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/ocrbench/OCRBench.json \
     --temperature 0 \
     --num_workers 1 \
-    --merge-strategy Fixed \
+    --merge-strategy CDPruner \
     --compression-rate 0.25 \
     --save_name ${VERSION}_latency \
     --measure-latency
+
+
+
+# python eval_code/model_vqa_ocrbench_profile.py \
+#     --model_path /fs/scratch/PAS2836/yusenpeng_checkpoint/Qwen3VL_SFT_10 \
+#     --model_base Qwen/Qwen3-VL-4B-Instruct \
+#     --image_folder /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/ocrbench/OCRBench_Images \
+#     --output_folder /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/ocrbench/results \
+#     --save_name ${VERSION} \
+#     --OCRBench_file /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/ocrbench/OCRBench.json \
+#     --temperature 0 \
+#     --num_workers 1 \
+#     --merge-strategy Fixed \
+#     --compression-rate 0.25 \
+#     --save_name ${VERSION}_latency \
+#     --measure-latency
 
 
 # python eval_code/model_vqa_ocrbench_profile.py \
