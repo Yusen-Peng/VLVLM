@@ -19,7 +19,7 @@ conda activate DRIP_flash
 python src/visualize_DRIP_plus_plus.py \
     --model-path /fs/scratch/PAS2836/yusenpeng_checkpoint/LLaVA_7B_DRIP_4x_pretrain_NEW_DOWN_temp001_train_full \
     --image-path /users/PAS2912/yusenpeng/DRIP/src/CDPruner_imgs/pancake.jpg \
-    --alpha 0.25 \
+    --alpha 0.75 \
     --prompts \
         "How many pancakes are in the image?" \
         "How many clusters of grapes are in the image?"
@@ -341,6 +341,11 @@ def visualize_maps(display_image, results, alpha, output_dir):
     output_path = os.path.join(
         output_dir,
         f"drip_plus_plus_analysis_{args.alpha}.png",
+    )
+
+    output_path = os.path.join(
+        output_dir,
+        f"drip_plus_plus_analysis_{args.alpha}.pdf",
     )
 
     plt.savefig(
