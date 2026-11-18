@@ -1,10 +1,10 @@
 #!/bin/bash
-#SBATCH --job-name=MMERealWorld_LLaVA_7B_VLVLM_9x
-#SBATCH --output=MMERealWorld_LLaVA_7B_VLVLM_9x.log
-#SBATCH --time=01:00:00
+#SBATCH --job-name=MMERealWorld_LLaVA_Siglip_ORIGINAL_4x
+#SBATCH --output=MMERealWorld_LLaVA_Siglip_ORIGINAL_4x.log
+#SBATCH --time=01:20:00
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --partition=debug-nextgen
+#SBATCH --partition=nextgen
 #SBATCH --gpus-per-node=1
 #SBATCH --cpus-per-task=16
 #SBATCH --mem=128G
@@ -19,10 +19,19 @@ export MASTER_PORT=$((12000 + RANDOM % 20000))
 
 cd /users/PAS2912/yusenpeng/DRIP/
 
-VERSION="LLaVA_7B_VLVLM_9x"
+VERSION="LLaVA_Siglip_ORIGINAL_4x"
+
+# python src/model_vqa_mme_real_world.py \
+#     --model-path /fs/scratch/PAS2836/yusenpeng_checkpoint/LLaVA_7B_DRIP_8x_pretrain_NEW_DOWN_temp10_train_full \
+#     --question-file /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/MMErealworld/MME-RealWorld.json \
+#     --image-folder /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/MMErealworld/images \
+#     --answers-file /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/MMErealworld/answers/${VERSION}.jsonl \
+#     --temperature 0 \
+#     --conv-mode vicuna_v1
+
 
 python src/model_vqa_mme_real_world.py \
-    --model-path /fs/scratch/PAS2836/yusenpeng_checkpoint/LLaVA_7B_DRIP_8x_pretrain_NEW_DOWN_temp10_train_full \
+    --model-path /fs/scratch/PAS2836/yusenpeng_checkpoint/LLaVA_7B_SigLIP_HF_v2_DRIP_4x_temp001_new_downsample_train_full \
     --question-file /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/MMErealworld/MME-RealWorld.json \
     --image-folder /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/MMErealworld/images \
     --answers-file /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/MMErealworld/answers/${VERSION}.jsonl \

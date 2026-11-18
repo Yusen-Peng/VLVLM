@@ -42,6 +42,9 @@ class SiglipVisionTower(nn.Module):
         self.temperature = temperature
         self.select_layer = args.mm_vision_select_layer
 
+        self.select_feature = getattr(args, "mm_vision_select_feature", "patch")
+        self.use_tokenpacker = getattr(args, "mm_projector_type", None) == "tokenpacker"
+
         if not delay_load:
             self.load_model()
         elif getattr(args, 'unfreeze_mm_vision_tower', False):
@@ -308,6 +311,17 @@ class SiglipVisionTower(nn.Module):
     def feature_select(self, image_forward_outs, output_attentions=False):
         # return image_forward_outs.hidden_states[:-1], image_forward_outs.attentions
         image_features = image_forward_outs.hidden_states[self.select_layer]
+
+        if self.use_tokenpacker:
+            # Four multi-level features, following TokenPacker
+            num_layers = self.config.num_hidden_layers
+            # Scale layer selections to the SigLIP2 encoder depth
+            layers = [max(1, round(num_layers * ratio)) for ratio in [12/24, 16/24, 22/24, 23/24]]
+            image_features_multi = torch.cat([image_forward_outs.hidden_states[l] for l in layers], dim=-1)
+            # SigLIP2 does not have a CLS token!
+            # Do NOT apply [:, 1:] here.
+            return image_features, image_features_multi
+
         if output_attentions:
             image_attentions = image_forward_outs.attentions[-1]
             image_attentions = image_attentions.mean(dim=-2)
@@ -315,6 +329,24 @@ class SiglipVisionTower(nn.Module):
         return image_features
 
     def forward(self, images, texts=None, inference=False, output_attentions=False):
+
+        if self.use_tokenpacker:
+            if isinstance(images, list):
+                image_features = []
+                image_features_multi = []
+                for image in images:
+                    image_forward_outs = self.vision_tower(image.to(device=self.device, dtype=self.dtype).unsqueeze(0), output_hidden_states=True)
+                    features, multi_features = self.feature_select(image_forward_outs)
+                    image_features.append(features.to(image.dtype))
+                    image_features_multi.append(multi_features.to(image.dtype))
+                return image_features, image_features_multi
+
+            image_forward_outs = self.vision_tower(images.to(device=self.device, dtype=self.dtype), output_hidden_states=True)
+            image_features, image_features_multi = self.feature_select(image_forward_outs)
+            return image_features.to(images.dtype), image_features_multi.to(images.dtype)       
+
+
+        
         if type(images) is list:
             image_features = []
             boundary_losses = []
