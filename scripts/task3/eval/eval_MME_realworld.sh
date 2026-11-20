@@ -1,6 +1,6 @@
 #!/bin/bash
-#SBATCH --job-name=MMERealWorld_LLaVA_Siglip_ORIGINAL_4x
-#SBATCH --output=MMERealWorld_LLaVA_Siglip_ORIGINAL_4x.log
+#SBATCH --job-name=1119_MME_realworld_LLaVA_7B_SigLIP_HF_v2_TokenPacker_9x
+#SBATCH --output=1119_MME_realworld_LLaVA_7B_SigLIP_HF_v2_TokenPacker_9x.log
 #SBATCH --time=01:20:00
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -19,7 +19,7 @@ export MASTER_PORT=$((12000 + RANDOM % 20000))
 
 cd /users/PAS2912/yusenpeng/DRIP/
 
-VERSION="LLaVA_Siglip_ORIGINAL_4x"
+VERSION="1119_MME_realworld_LLaVA_7B_SigLIP_HF_v2_TokenPacker_9x"
 
 # python src/model_vqa_mme_real_world.py \
 #     --model-path /fs/scratch/PAS2836/yusenpeng_checkpoint/LLaVA_7B_DRIP_8x_pretrain_NEW_DOWN_temp10_train_full \
@@ -30,24 +30,23 @@ VERSION="LLaVA_Siglip_ORIGINAL_4x"
 #     --conv-mode vicuna_v1
 
 
-python src/model_vqa_mme_real_world.py \
-    --model-path /fs/scratch/PAS2836/yusenpeng_checkpoint/LLaVA_7B_SigLIP_HF_v2_DRIP_4x_temp001_new_downsample_train_full \
-    --question-file /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/MMErealworld/MME-RealWorld.json \
-    --image-folder /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/MMErealworld/images \
-    --answers-file /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/MMErealworld/answers/${VERSION}.jsonl \
-    --temperature 0 \
-    --conv-mode vicuna_v1
-
-
 # python src/model_vqa_mme_real_world.py \
-#     --model-path /fs/scratch/PAS2836/yusenpeng_checkpoint/LLaVA_7B_TokenPacker_9x_train_lora \
-#     --model-base lmsys/vicuna-7b-v1.5 \
+#     --model-path /fs/scratch/PAS2836/yusenpeng_checkpoint/LLaVA_7B_SigLIP_HF_v2_DRIP_4x_temp001_new_downsample_train_full \
 #     --question-file /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/MMErealworld/MME-RealWorld.json \
 #     --image-folder /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/MMErealworld/images \
 #     --answers-file /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/MMErealworld/answers/${VERSION}.jsonl \
 #     --temperature 0 \
 #     --conv-mode vicuna_v1
 
+
+python src/model_vqa_mme_real_world.py \
+    --model-path /fs/scratch/PAS2836/yusenpeng_checkpoint/LLaVA_7B_SigLIP_HF_v2_TokenPacker_9x_train_lora \
+    --model-base lmsys/vicuna-7b-v1.5 \
+    --question-file /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/MMErealworld/MME-RealWorld.json \
+    --image-folder /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/MMErealworld/images \
+    --answers-file /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/MMErealworld/answers/${VERSION}.jsonl \
+    --temperature 0 \
+    --conv-mode vicuna_v1
 
 cd /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/MMErealworld
 

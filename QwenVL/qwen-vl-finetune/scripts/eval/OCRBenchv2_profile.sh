@@ -1,10 +1,10 @@
 #!/bin/bash
-#SBATCH --job-name=1107_OCRBenchv2_Qwen3VL_VLVLM_profile
-#SBATCH --output=1107_OCRBenchv2_Qwen3VL_VLVLM_profile.log
-#SBATCH --time=08:00:00
+#SBATCH --job-name=1119_OCRBenchv2_Qwen3VL_8B_profile
+#SBATCH --output=1119_OCRBenchv2_Qwen3VL_8B_profile.log
+#SBATCH --time=10:00:00
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --partition=quad
+#SBATCH --partition=nextgen
 #SBATCH --gpus-per-node=1
 #SBATCH --cpus-per-task=16
 #SBATCH --mem=128G
@@ -20,7 +20,7 @@ export TOKENIZERS_PARALLELISM=false
 
 cd /users/PAS2912/yusenpeng/DRIP/QwenVL/qwen-vl-finetune/qwenvl
 
-VERSION="1107_OCRBenchv2_Qwen3VL_VLVLM_profile"
+VERSION="1119_OCRBenchv2_Qwen3VL_8B_profile"
 
 # python eval_code/model_vqa_ocrbenchv2_profile.py \
 #     --model_path /fs/scratch/PAS2836/yusenpeng_checkpoint/Qwen3VL_SFT_10 \
@@ -33,6 +33,17 @@ VERSION="1107_OCRBenchv2_Qwen3VL_VLVLM_profile"
 #     --num_workers 1 \
 #     --temperature 0 \
 #     --measure-latency
+
+python eval_code/model_vqa_ocrbenchv2_profile.py \
+    --model_path Qwen/Qwen3-VL-8B-Instruct \
+    --dataset_path lmms-lab/OCRBench-v2 \
+    --dataset_split test \
+    --cache_dir /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/ocrbenchv2 \
+    --output_folder /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/ocrbenchv2/results \
+    --save_name ${VERSION} \
+    --num_workers 1 \
+    --temperature 0 \
+    --measure-latency
 
 
 # python eval_code/model_vqa_ocrbenchv2_profile.py \
@@ -64,21 +75,21 @@ VERSION="1107_OCRBenchv2_Qwen3VL_VLVLM_profile"
 #     --compression-rate 0.25
 
 
-python eval_code/model_vqa_ocrbenchv2_profile.py \
-    --model_path /fs/scratch/PAS2836/yusenpeng_checkpoint/Qwen3VL_SFT_DRIP_4x_NEW_PIPELINE_transfer \
-    --model_base Qwen/Qwen3-VL-4B-Instruct \
-    --dataset_path lmms-lab/OCRBench-v2 \
-    --dataset_split test \
-    --cache_dir /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/ocrbenchv2 \
-    --output_folder /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/ocrbenchv2/results \
-    --save_name ${VERSION} \
-    --num_workers 1 \
-    --temperature 0 \
-    --merge-strategy DRIP \
-    --compression-rate 0.25 \
-    --drip-path /fs/scratch/PAS2836/yusenpeng_checkpoint/Qwen3VL_SFT_DRIP_4x_NEW_PIPELINE_transfer/drip.bin \
-    --mlp-ratio 4.0 \
-    --measure-latency
+# python eval_code/model_vqa_ocrbenchv2_profile.py \
+#     --model_path /fs/scratch/PAS2836/yusenpeng_checkpoint/Qwen3VL_SFT_DRIP_4x_NEW_PIPELINE_transfer \
+#     --model_base Qwen/Qwen3-VL-4B-Instruct \
+#     --dataset_path lmms-lab/OCRBench-v2 \
+#     --dataset_split test \
+#     --cache_dir /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/ocrbenchv2 \
+#     --output_folder /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/ocrbenchv2/results \
+#     --save_name ${VERSION} \
+#     --num_workers 1 \
+#     --temperature 0 \
+#     --merge-strategy DRIP \
+#     --compression-rate 0.25 \
+#     --drip-path /fs/scratch/PAS2836/yusenpeng_checkpoint/Qwen3VL_SFT_DRIP_4x_NEW_PIPELINE_transfer/drip.bin \
+#     --mlp-ratio 4.0 \
+#     --measure-latency
 
 conda deactivate
 

@@ -1,6 +1,6 @@
 #!/bin/bash
-#SBATCH --job-name=1112_DocVQA_LLaVA_7B_TokenPacker_9x
-#SBATCH --output=1112_DocVQA_LLaVA_7B_TokenPacker_9x.log
+#SBATCH --job-name=1119_DocVQA_LLaVA_7B_SigLIP_HF_v2_TokenPacker_9x
+#SBATCH --output=1119_DocVQA_LLaVA_7B_SigLIP_HF_v2_TokenPacker_9x.log
 #SBATCH --time=00:40:00
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -19,7 +19,7 @@ export TOKENIZERS_PARALLELISM=false
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 cd /users/PAS2912/yusenpeng/DRIP
 
-VERSION="1112_DocVQA_LLaVA_7B_TokenPacker_9x"
+VERSION="1119_DocVQA_LLaVA_7B_SigLIP_HF_v2_TokenPacker_9x"
 echo "Running LLaVA inference..."
 
 
@@ -58,7 +58,7 @@ echo "Running LLaVA inference..."
 #   --conv-mode llava_v1
 
 python src/model_vqa_loader.py \
-  --model-path /fs/scratch/PAS2836/yusenpeng_checkpoint/LLaVA_7B_TokenPacker_9x_train_lora \
+  --model-path /fs/scratch/PAS2836/yusenpeng_checkpoint/LLaVA_7B_SigLIP_HF_v2_TokenPacker_9x_train_lora \
   --model-base lmsys/vicuna-7b-v1.5 \
   --image-folder /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/docvqa/images \
   --question-file /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/docvqa/docvqa_validation_llava.jsonl \

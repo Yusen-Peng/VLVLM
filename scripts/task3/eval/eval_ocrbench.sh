@@ -1,6 +1,6 @@
 #!/bin/bash
-#SBATCH --job-name=1112_OCRBench_LLaVA_7B_TokenPacker_9x
-#SBATCH --output=1112_OCRBench_LLaVA_7B_TokenPacker_9x.log
+#SBATCH --job-name=1119_OCRBench_LLaVA_7B_SigLIP_HF_v2_TokenPacker_9x
+#SBATCH --output=1119_OCRBench_LLaVA_7B_SigLIP_HF_v2_TokenPacker_9x.log
 #SBATCH --time=00:40:00
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -19,7 +19,7 @@ export MASTER_PORT=$((12000 + RANDOM % 20000))
 
 cd /users/PAS2912/yusenpeng/DRIP/
 
-VERSION="1112_OCRBench_LLaVA_7B_TokenPacker_9x"
+VERSION="1119_OCRBench_LLaVA_7B_SigLIP_HF_v2_TokenPacker_9x"
 
 # python src/model_vqa_ocrbench.py \
 #     --model_path /fs/scratch/PAS2836/yusenpeng_checkpoint/LLaVA_7B_DRIP_8x_pretrain_NEW_DOWN_temp10_train_full \
@@ -64,7 +64,7 @@ VERSION="1112_OCRBench_LLaVA_7B_TokenPacker_9x"
 
 
 python src/model_vqa_ocrbench.py \
-    --model_path /fs/scratch/PAS2836/yusenpeng_checkpoint/LLaVA_7B_TokenPacker_9x_train_lora \
+    --model_path /fs/scratch/PAS2836/yusenpeng_checkpoint/LLaVA_7B_SigLIP_HF_v2_TokenPacker_9x_train_lora \
     --model_base lmsys/vicuna-7b-v1.5 \
     --image_folder /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/ocrbench/OCRBench_Images \
     --output_folder /fs/scratch/PAS2836/yusenpeng_dataset/LLaVA_eval/ocrbench/results \
